@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 import { lazy, Suspense } from 'react'
-import BasicLayout from '../layouts/BasicLayout'
+import BasicLayout from '../layouts/BasicLayout.tsx'
+import TodoRouter from './TodoRouter.tsx'
 
 /**
  * lazy: 레이징 로딩 (필요할 때 까지 로딩을 미루는 기능)
@@ -9,8 +10,9 @@ import BasicLayout from '../layouts/BasicLayout'
  * 아래와 같이 작성하면 각 라우트에 접속할 때 필요한 컴포넌트만 따로 불러와 초기 로딩 시간을 단축하는 분할 로딩이 구현
  */
 const Loading = () => <div>Loading...</div>
-const Main = lazy(() => import('../pages/MainPage'))
-const About = lazy(() => import('../pages/AboutPage'))
+const Main = lazy(() => import('../pages/MainPage.tsx'))
+const About = lazy(() => import('../pages/AboutPage.tsx'))
+// const TodoIndex = lazy(() => import('../pages/todo/IndexPage.tsx'))
 
 /**
  * React Router v6 이후에 라우트 구성 방식이 변경 - 두 번째 코드: React Router v6.4+의 최신 방식
@@ -36,7 +38,7 @@ const About = lazy(() => import('../pages/AboutPage'))
 //   },
 // ])
 
-const router = createBrowserRouter([
+const BasicRouter = createBrowserRouter([
   {
     path: '',
     Component: BasicLayout,
@@ -57,8 +59,9 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      TodoRouter(),
     ],
   },
 ])
 
-export default router
+export default BasicRouter
