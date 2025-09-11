@@ -4,7 +4,6 @@ import org.personal.project.dto.PageRequestDTO;
 import org.personal.project.dto.PageResponseDTO;
 import org.personal.project.dto.TodoDTO;
 import org.personal.project.entity.Todo;
-import org.springframework.stereotype.Service;
 
 public interface TodoService {
 

@@ -3,7 +3,6 @@ package org.personal.project.service;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.personal.project.dto.PageRequestDTO;
-import org.personal.project.dto.PageResponseDTO;
 import org.personal.project.dto.TodoDTO;
 import org.personal.project.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
