@@ -33,6 +33,12 @@ public class TodoController {
         return service.getOne(tno);
     }
 
+    /**
+     * 사용 기준
+     * PathVariable: PathVariable으로 받아온 값으로 결과를 출력할 때 언제든지 결과가 같은 경우
+     * QueryString: 받아온 결과가 시간에 따라 결과가 다른 경우
+     *
+     */
     @GetMapping("/list")
     public PageResponseDTO<TodoDTO> list(PageRequestDTO pageRequestDTO) {
 

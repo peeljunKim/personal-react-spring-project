@@ -34,7 +34,7 @@ public class TodoRepositoryTests {
         for (int i = 0; i < 100; i++) {
             Todo todo = Todo.builder()
                     .title("title_" + i)
-                    .content("content")
+                    .writer("content")
                     .dueDate(LocalDate.of(2025, 10, 1))
                     .build();
 

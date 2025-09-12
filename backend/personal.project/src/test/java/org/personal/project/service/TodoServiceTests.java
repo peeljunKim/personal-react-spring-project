@@ -10,8 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @Log4j2
 class TodoServiceTests {
@@ -35,7 +33,7 @@ class TodoServiceTests {
 
         TodoDTO todoDTO = TodoDTO.builder()
                 .title("서비스 테스트")
-                .content("test")
+                .writer("test")
                 .dueDate(LocalDate.of(2023, 10, 10))
                 .build();
 

@@ -16,7 +16,7 @@ public class TodoDTO {
 
     private Long tno;
     private String title;
-    private String content;
+    private String writer;
     private boolean complete;
     private LocalDate dueDate;
 }
