@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getList } from '../../api/TodoApi'
 import useCustomMove from '../../hooks/useCustomMove'
-import PageComponent from '../common/pageComponent'
+import PageComponent from '../common/PageComponent'
 
 const initState: PageResponseDTO<Todo> = {
   dtoList: [],
