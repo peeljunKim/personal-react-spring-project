@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router'
+import ListComponent from '../../components/todo/ListComponent'
 
 /**
  * useSearchParams: url에 쿼리 스트링을 가져오는 hooks
@@ -15,6 +16,8 @@ function ListPage() {
       <div className="text-4xl">
         Todo List Page {page} {size}
       </div>
+
+      <ListComponent></ListComponent>
     </div>
   )
 }
