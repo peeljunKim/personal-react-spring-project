@@ -10,6 +10,7 @@ interface UseCustomMoveReturn {
   moveToRead: (tno: number) => void
   page: number
   size: number
+  refresh: boolean
 }
 
 interface PageRequestDTO {
