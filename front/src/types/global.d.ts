@@ -30,3 +30,9 @@ interface PageResponseDTO<T> {
   totalPage: number // 전체 페이지 개수
   current: number // 현재 페이지 번호
 }
+
+interface ResultModal {
+  title: string
+  content: string
+  callbackFn?: () => void
+}
