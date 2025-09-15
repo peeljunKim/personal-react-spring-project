@@ -44,7 +44,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
       complete: todo.complete,
     }
 
-    putOne(todo).then((data) => {
+    putOne(todoModify).then((data) => {
       console.log('modify result: ' + data)
       setResult('Modified')
     })
