@@ -49,10 +49,10 @@ public class TodoServiceImpl implements TodoService {
 
         Todo todo = result.orElseThrow();
 
-        todo.changeDueDate(todo.getDueDate());
-        todo.changeComplete(todo.isComplete());
-        todo.changeTitle(todo.getTitle());
-        todo.changeWriter(todo.getWriter());
+        todo.changeDueDate(todoDTO.getDueDate());
+        todo.changeComplete(todoDTO.isComplete());
+        todo.changeTitle(todoDTO.getTitle());
+        todo.changeWriter(todoDTO.getWriter());
 
         todoRepository.save(todo);
     }
