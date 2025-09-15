@@ -63,6 +63,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
     } else {
       moveToRead(tno)
     }
+    setResult(null)
   }
 
   return (
@@ -83,6 +84,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
           </div>
         </div>
       </div>
+
       <div className="flex justify-center">
         <div className="relative mb-4 flex w-full flex-wrap items-stretch">
           <div className="w-1/5 p-6 text-right font-bold">WRITER</div>
@@ -91,6 +93,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
           </div>
         </div>
       </div>
+
       <div className="flex justify-center">
         <div className="relative mb-4 flex w-full flex-wrap items-stretch">
           <div className="w-1/5 p-6 text-right font-bold">TITLE</div>
@@ -103,6 +106,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
           ></input>
         </div>
       </div>
+
       <div className="flex justify-center">
         <div className="relative mb-4 flex w-full flex-wrap items-stretch">
           <div className="w-1/5 p-6 text-right font-bold">DUEDATE</div>
@@ -115,6 +119,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
           ></input>
         </div>
       </div>
+
       <div className="flex justify-center">
         <div className="relative mb-4 flex w-full flex-wrap items-stretch">
           <div className="w-1/5 p-6 text-right font-bold">COMPLETE</div>
@@ -138,6 +143,7 @@ const ModifyComponent = ({ tno }: { tno: number }) => {
         >
           Delete
         </button>
+
         <button
           type="button"
           className="rounded p-4 m-2 text-xl w-32 text-white bg-blue-500"
