@@ -64,7 +64,7 @@ public class TodoRepositoryTests {
         Todo todo = result.orElseThrow();
 
         todo.changeTitle("update title");
-        todo.changeContent("update content");
+        todo.changeWriter("update Writer");
         todo.changeComplete(true);
         todo.changeDueDate(LocalDate.of(2025, 12, 31));
 
