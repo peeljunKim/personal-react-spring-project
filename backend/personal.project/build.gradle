@@ -48,6 +48,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
+    // https://mvnrepository.com/artifact/net.coobird/thumbnailator
+    implementation 'net.coobird:thumbnailator:0.4.19'
+
     // https://mvnrepository.com/artifact/com.querydsl/querydsl-jpa
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
 

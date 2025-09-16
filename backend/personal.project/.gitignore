@@ -27,6 +27,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 src/test/
+upload/
 
 ### NetBeans ###
 /nbproject/private/
