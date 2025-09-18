@@ -8,11 +8,17 @@ function BasicMenu() {
           <li className="pr-6 text-2xl">
             <NavLink to="/">Main</NavLink>
           </li>
+
           <li className="pr-6 text-2xl">
             <NavLink to="/about">About</NavLink>
           </li>
+
           <li className="pr-6 text-2xl">
             <NavLink to="/todo/">Todo</NavLink>
+          </li>
+
+          <li className="pr-6 text-2xl">
+            <NavLink to="/products/">Products</NavLink>
           </li>
         </ul>
       </div>
