@@ -9,6 +9,7 @@ import org.personal.project.service.ProductService;
 import org.personal.project.util.CustomFileUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +47,8 @@ public class ProductController {
         return fileUtil.getFile(fileName);
     }
 
+
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')") //임시로 권한 설정
     @GetMapping("/list")
     public PageResponseDTO<ProductDTO> getList(PageRequestDTO pageRequestDTO) {
         return productService.getList(pageRequestDTO);

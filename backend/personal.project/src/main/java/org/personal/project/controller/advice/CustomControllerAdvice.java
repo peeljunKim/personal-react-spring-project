@@ -1,5 +1,6 @@
 package org.personal.project.controller.advice;
 
+import org.personal.project.util.CustomJWTException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -16,7 +17,6 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(NoSuchElementException.class)
     protected ResponseEntity<?> notExist(NoSuchElementException e) {
-
         String msg = e.getMessage();
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("msg", msg));
@@ -24,7 +24,6 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<?> handleIllegalArgumentException(MethodArgumentNotValidException e) {
-
         String msg = e.getMessage();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("msg", msg));
@@ -32,7 +31,6 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected ResponseEntity<?> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
-
         String msg = e.getMessage();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("msg", msg));
@@ -40,9 +38,15 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     protected ResponseEntity<?> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-
         String msg = e.getMessage();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("msg", msg));
+    }
+
+    @ExceptionHandler(CustomJWTException.class)
+    protected ResponseEntity<?> handleJWTException(CustomJWTException e) {
+        String msg = e.getMessage();
+
+        return ResponseEntity.ok().body(Map.of("error", msg));
     }
 }
