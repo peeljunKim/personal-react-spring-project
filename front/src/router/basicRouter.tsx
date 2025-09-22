@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import BasicLayout from '../layouts/BasicLayout.tsx'
 import TodoRouter from './TodoRouter.tsx'
 import ProductRouter from './ProductRouter.tsx'
+import memberRouter from './MemberRouter.tsx'
 
 /**
  * lazy: 레이징 로딩 (필요할 때 까지 로딩을 미루는 기능)
@@ -11,6 +12,7 @@ import ProductRouter from './ProductRouter.tsx'
  * 아래와 같이 작성하면 각 라우트에 접속할 때 필요한 컴포넌트만 따로 불러와 초기 로딩 시간을 단축하는 분할 로딩이 구현
  */
 const Loading = () => <div>Loading...</div>
+
 const Main = lazy(() => import('../pages/MainPage.tsx'))
 const About = lazy(() => import('../pages/AboutPage.tsx'))
 // const TodoIndex = lazy(() => import('../pages/todo/IndexPage.tsx'))
@@ -64,6 +66,7 @@ const BasicRouter = createBrowserRouter([
       ProductRouter(),
     ],
   },
+  memberRouter(),
 ])
 
 export default BasicRouter
