@@ -28,14 +28,14 @@ public class APIRefreshController {
 
         String accessToken = authHeader.substring(7);
 
-        //Access 토큰이 만료되지 않았다면
+        //Access 토큰 만료 여부 확인
         if (checkExpiredToken(accessToken) == false) {
             return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
         }
 
         //Refresh토큰 검증
         Map<String, Object> claims = JWTUtil.validateToken(refreshToken);
-        log.info("refresh ... claims: " + claims);
+        log.info("refreshToken claims = {} ", claims);
         String newAccessToken = JWTUtil.generateToken(claims, 10);
         String newRefreshToken = checkTime((Integer) claims.get("exp")) == true ?
                 JWTUtil.generateToken(claims, 60 * 24) : refreshToken;
