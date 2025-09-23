@@ -4,6 +4,7 @@ import {
   useLoaderData,
   type LoaderFunctionArgs,
 } from 'react-router'
+import jwtAxios from '../../util/JwtUtil'
 
 export async function loadProducts({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url)
@@ -12,7 +13,7 @@ export async function loadProducts({ request }: LoaderFunctionArgs) {
   const queryStr = createSearchParams({ page, size }).toString()
 
   // api를 여기서 설정
-  const res = await axios.get(
+  const res = await jwtAxios.get(
     `http://localhost:8080/api/products/list?${queryStr}`
   )
 

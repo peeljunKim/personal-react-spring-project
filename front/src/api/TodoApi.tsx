@@ -1,4 +1,5 @@
 import axios from 'axios'
+import jwtAxios from '../util/JwtUtil'
 
 export const API_SERVER_HOST = 'http://localhost:8080'
 
@@ -7,19 +8,19 @@ const prefix = `${API_SERVER_HOST}/api/todo`
 // todo detail api
 // async 함수의 리턴은 무조건 Promise, 실제로 반환 값은 Promise<Todo>
 export const getOne = async (tno: number) => {
-  const res = await axios.get(`${prefix}/${tno}`)
+  const res = await jwtAxios.get(`${prefix}/${tno}`)
   return res.data
 }
 
 // 페이징 목록 api
 export const getList = async (pageParam: PageParam) => {
-  const res = await axios.get(`${prefix}/list`, { params: pageParam })
+  const res = await jwtAxios.get(`${prefix}/list`, { params: pageParam })
   return res.data
 }
 
 // todo 등록 api
 export const postAdd = async (todoObj: TodoAdd) => {
-  const res = await axios.post(`${prefix}/`, todoObj)
+  const res = await jwtAxios.post(`${prefix}/`, todoObj)
   return res.data
 }
 
@@ -31,6 +32,6 @@ export const deleteOne = async (tno: number) => {
 
 // todo 수정 api
 export const putOne = async (todo: TodoModify) => {
-  const res = await axios.put(`${prefix}/${todo.tno}`, todo)
+  const res = await jwtAxios.put(`${prefix}/${todo.tno}`, todo)
   return res.data
 }
