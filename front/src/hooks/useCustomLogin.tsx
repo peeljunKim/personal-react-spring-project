@@ -1,7 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '../store'
 import { Navigate, useNavigate } from 'react-router'
-import { loginPostAsync, logout } from '../slices/LoginSlice'
+import { loginPostAsync, logout, save } from '../slices/LoginSlice'
+import { useEffect } from 'react'
+import { getCookie } from '../util/CookieUtil'
 
 const useCustomLogin = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -36,6 +38,18 @@ const useCustomLogin = () => {
   const moveToPath = (path: string) => {
     navigate({ pathname: path }, { replace: true })
   }
+
+  // 페이지 처음 로딩 시 쿠키 확인
+  useEffect(() => {
+    if (!loginStatus) {
+      const member = getCookie('member')
+      console.log('member from cookie = ', member)
+
+      if (member) {
+        dispatch(save(member))
+      }
+    }
+  }, [])
 
   return {
     loginState,

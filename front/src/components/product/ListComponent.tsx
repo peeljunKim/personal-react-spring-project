@@ -26,7 +26,7 @@ function ListComponent({
                   <img
                     alt="product"
                     className="m-auto rounded-md w-60"
-                    src={`http://localhost:8080/api/products/view/s_${product.uploadFileNames[0]}`}
+                    src={`http://localhost:8080/api/products/view/s_${product.uploadedFileNames[0]}`}
                   />
                 </div>
                 <div className="bottom-0 font-extrabold bg-white">

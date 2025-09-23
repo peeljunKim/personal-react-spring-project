@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { loginPost } from '../api/MemberApi'
+import { removeCookie, setCookie } from '../util/CookieUtil'
 
 // API 서버의 response
 export interface LoginInfo {
@@ -38,7 +39,15 @@ const loginSlice = createSlice({
   reducers: {
     logout: (state, action) => {
       console.log('logout')
+      removeCookie('member')
+
       return { ...initState }
+    },
+
+    save: (state, action) => {
+      console.log('save')
+
+      return action.payload
     },
   },
 
@@ -51,6 +60,7 @@ const loginSlice = createSlice({
         console.log('payload', action.payload)
 
         newState.status = 'fulfilled'
+        setCookie('member', JSON.stringify(newState), 1)
 
         return newState
       })
@@ -67,5 +77,5 @@ const loginSlice = createSlice({
   },
 })
 
-export const { logout } = loginSlice.actions
+export const { save, logout } = loginSlice.actions
 export default loginSlice.reducer
