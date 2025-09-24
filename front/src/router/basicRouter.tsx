@@ -4,6 +4,7 @@ import BasicLayout from '../layouts/BasicLayout.tsx'
 import TodoRouter from './TodoRouter.tsx'
 import ProductRouter from './ProductRouter.tsx'
 import memberRouter from './MemberRouter.tsx'
+import oauthRouter from './OauthRouter.tsx'
 
 /**
  * lazy: 레이징 로딩 (필요할 때 까지 로딩을 미루는 기능)
@@ -67,6 +68,7 @@ const BasicRouter = createBrowserRouter([
     ],
   },
   memberRouter(),
+  oauthRouter(),
 ])
 
 export default BasicRouter
