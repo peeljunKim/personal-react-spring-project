@@ -38,6 +38,11 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+        //api/oauth/ 경로의 호출은 체크하지 않음 - oauth2.0 관련
+        if (path.startsWith("/api/oauth/")) {
+            return true;
+        }
+
         //이미지 조회 경로는 체크하지 않음
         if (path.startsWith("/api/products/view/")) {
             return true;
