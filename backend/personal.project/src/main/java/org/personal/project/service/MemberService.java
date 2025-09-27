@@ -1,6 +1,7 @@
 package org.personal.project.service;
 
 import org.personal.project.dto.MemberDTO;
+import org.personal.project.dto.MemberModifyDTO;
 import org.personal.project.entity.Member;
 
 import java.util.stream.Collectors;
@@ -8,6 +9,8 @@ import java.util.stream.Collectors;
 public interface MemberService {
 
     MemberDTO getKakaoMember(String accessToken);
+
+    void modifyMember(MemberModifyDTO memberModifyDTO);
 
     default MemberDTO entityToDTO(Member member) {
         MemberDTO dto = new MemberDTO(
