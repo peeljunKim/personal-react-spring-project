@@ -3,6 +3,7 @@ package org.personal.project.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.personal.project.dto.MemberDTO;
+import org.personal.project.dto.MemberModifyDTO;
 import org.personal.project.entity.Member;
 import org.personal.project.entity.MemberRole;
 import org.personal.project.repository.MemberRepository;
@@ -48,6 +49,18 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(socialMember);
 
         return entityToDTO(socialMember);
+    }
+
+    @Override
+    public void modifyMember(MemberModifyDTO memberModifyDTO) {
+        Optional<Member> result = memberRepository.findById(memberModifyDTO.getEmail());
+
+        Member member = result.orElseThrow();
+
+        member.changePw(passwordEncoder.encode(memberModifyDTO.getPw()));
+        member.changeNickname(memberModifyDTO.getNickname());
+
+        memberRepository.save(member);
     }
 
 

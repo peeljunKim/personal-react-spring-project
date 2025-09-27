@@ -3,9 +3,12 @@ package org.personal.project.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.personal.project.dto.MemberDTO;
+import org.personal.project.dto.MemberModifyDTO;
 import org.personal.project.service.MemberService;
 import org.personal.project.util.JWTUtil;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -26,12 +29,21 @@ public class SocialController {
         Map<String, Object> claims = memberDTO.getClaims();
 
         String jwtAccessToken = JWTUtil.generateToken(claims, 10);
-        String jwtRefreshToken = JWTUtil.generateToken(claims,60*24);
+        String jwtRefreshToken = JWTUtil.generateToken(claims, 60 * 24);
 
         claims.put("accessToken", jwtAccessToken);
         claims.put("refreshToken", jwtRefreshToken);
 
         return claims;
     }
+
+    @PutMapping("/api/member/modify")
+    public Map<String, String> modify(@RequestBody MemberModifyDTO memberModifyDTO) {
+        log.info("member modify: " + memberModifyDTO);
+        memberService.modifyMember(memberModifyDTO);
+
+        return Map.of("result", "modified");
+    }
+
 }
 
