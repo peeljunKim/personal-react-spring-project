@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
-import { useSearchParams } from 'react-router'
+import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { getAccessToken, getMemberWithAccessToken } from '../../api/KakaoApi'
+import type { AppDispatch } from '../../store'
+import { useDispatch } from 'react-redux'
+import { save } from '../../slices/LoginSlice'
 
 const KakaoRedirectPage = () => {
   const [searchParams] = useSearchParams()
   const authCode = searchParams.get('code')
+  const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (authCode) {
@@ -14,7 +19,13 @@ const KakaoRedirectPage = () => {
         if (accessToken) {
           getMemberWithAccessToken(accessToken).then((memberInfo) => {
             console.log('-------------------')
-            console.log(memberInfo)
+            console.log('memberInfo = ' + memberInfo)
+            console.log('social  =  ' + memberInfo.social)
+            dispatch(save(memberInfo))
+
+            if (memberInfo.social) {
+              navigate('/member/modify')
+            }
           })
         }
       })
@@ -22,10 +33,9 @@ const KakaoRedirectPage = () => {
   }, [authCode])
 
   return (
-    <div>
-      <div>Kakao Login Redirect</div>
-      <div>{authCode}</div>
-    </div>
+    <>
+      <Navigate to={'/'}></Navigate>
+    </>
   )
 }
 
