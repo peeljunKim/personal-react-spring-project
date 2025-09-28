@@ -2,8 +2,8 @@ package org.personal.project.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.MemberDTO;
-import org.personal.project.dto.MemberModifyDTO;
+import org.personal.project.dto.member.MemberDTO;
+import org.personal.project.dto.member.MemberModifyDTO;
 import org.personal.project.entity.Member;
 import org.personal.project.entity.MemberRole;
 import org.personal.project.repository.MemberRepository;

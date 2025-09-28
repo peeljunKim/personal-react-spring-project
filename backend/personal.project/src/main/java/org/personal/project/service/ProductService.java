@@ -1,7 +1,7 @@
 package org.personal.project.service;
 
-import org.personal.project.dto.PageRequestDTO;
-import org.personal.project.dto.PageResponseDTO;
+import org.personal.project.dto.page.PageRequestDTO;
+import org.personal.project.dto.page.PageResponseDTO;
 import org.personal.project.dto.ProductDTO;
 import org.personal.project.entity.Product;
 import org.personal.project.entity.ProductImage;

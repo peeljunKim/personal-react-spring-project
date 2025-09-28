@@ -1,4 +1,4 @@
-package org.personal.project.dto;
+package org.personal.project.dto.member;
 
 import lombok.Getter;
 import lombok.Setter;

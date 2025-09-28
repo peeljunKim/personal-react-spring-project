@@ -1,7 +1,7 @@
 package org.personal.project.service;
 
-import org.personal.project.dto.MemberDTO;
-import org.personal.project.dto.MemberModifyDTO;
+import org.personal.project.dto.member.MemberDTO;
+import org.personal.project.dto.member.MemberModifyDTO;
 import org.personal.project.entity.Member;
 
 import java.util.stream.Collectors;

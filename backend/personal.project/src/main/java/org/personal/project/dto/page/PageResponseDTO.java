@@ -1,4 +1,4 @@
-package org.personal.project.dto;
+package org.personal.project.dto.page;
 
 import lombok.Builder;
 import lombok.Data;
