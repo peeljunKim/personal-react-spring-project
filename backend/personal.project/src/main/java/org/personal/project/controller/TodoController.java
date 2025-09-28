@@ -2,8 +2,8 @@ package org.personal.project.controller;
 
 import java.util.Map;
 
-import org.personal.project.dto.PageRequestDTO;
-import org.personal.project.dto.PageResponseDTO;
+import org.personal.project.dto.page.PageRequestDTO;
+import org.personal.project.dto.page.PageResponseDTO;
 import org.personal.project.dto.TodoDTO;
 import org.personal.project.service.TodoService;
 import org.springframework.web.bind.annotation.DeleteMapping;

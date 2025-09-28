@@ -2,7 +2,7 @@ package org.personal.project.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.MemberDTO;
+import org.personal.project.dto.member.MemberDTO;
 import org.personal.project.entity.Member;
 import org.personal.project.repository.MemberRepository;
 import org.springframework.security.core.userdetails.UserDetails;

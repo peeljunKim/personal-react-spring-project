@@ -2,7 +2,7 @@ package org.personal.project.repository.search;
 
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.PageRequestDTO;
+import org.personal.project.dto.page.PageRequestDTO;
 import org.personal.project.entity.QTodo;
 import org.personal.project.entity.Todo;
 import org.springframework.data.domain.*;

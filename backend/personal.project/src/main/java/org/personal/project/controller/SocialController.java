@@ -2,8 +2,8 @@ package org.personal.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.MemberDTO;
-import org.personal.project.dto.MemberModifyDTO;
+import org.personal.project.dto.member.MemberDTO;
+import org.personal.project.dto.member.MemberModifyDTO;
 import org.personal.project.service.MemberService;
 import org.personal.project.util.JWTUtil;
 import org.springframework.web.bind.annotation.GetMapping;

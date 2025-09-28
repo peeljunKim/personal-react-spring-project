@@ -1,10 +1,9 @@
 package org.personal.project.repository.search;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.PageRequestDTO;
-import org.personal.project.dto.PageResponseDTO;
+import org.personal.project.dto.page.PageRequestDTO;
+import org.personal.project.dto.page.PageResponseDTO;
 import org.personal.project.dto.ProductDTO;
 import org.personal.project.entity.Product;
 import org.personal.project.entity.QProduct;

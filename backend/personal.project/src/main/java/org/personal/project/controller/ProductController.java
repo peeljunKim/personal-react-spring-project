@@ -2,8 +2,8 @@ package org.personal.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.dto.PageRequestDTO;
-import org.personal.project.dto.PageResponseDTO;
+import org.personal.project.dto.page.PageRequestDTO;
+import org.personal.project.dto.page.PageResponseDTO;
 import org.personal.project.dto.ProductDTO;
 import org.personal.project.service.ProductService;
 import org.personal.project.util.CustomFileUtil;
