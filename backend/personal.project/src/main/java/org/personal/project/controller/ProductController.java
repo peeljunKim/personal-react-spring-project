@@ -65,7 +65,7 @@ public class ProductController {
 
         Long pno = productService.register(productDTO);
 
-        return Map.of("RESULT", pno);
+        return Map.of("result", pno);
     }
 
     @GetMapping("/{pno}")
