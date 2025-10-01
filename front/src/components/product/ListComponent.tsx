@@ -17,15 +17,18 @@ function ListComponent({
     const sizeValue = pageParam.size ? pageParam.size : 10
 
     if (pageValue === page) {
-      if (!confirm('현재 페이지입니다. 새로고침 하시겠습니까?')) {
-        return
-      }
+      // if (!confirm('현재 페이지입니다. 새로고침 하시겠습니까?')) {
+      //   return
+      // }
+      console.log('캐시 무료화')
+      queryClient.invalidateQueries({
+        queryKey: ['products/list', page, size], // 해당 키를 가진 캐시를 무료화
+      })
+      moveToList(pageParam)
+
+      return
     }
 
-    console.log('캐시 무료화')
-    queryClient.invalidateQueries({
-      queryKey: ['products/list', page, size], // 해당 키를 가진 캐시를 무료화
-    })
     moveToList(pageParam)
   }
 
