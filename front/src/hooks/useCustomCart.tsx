@@ -3,15 +3,19 @@ import type { AppDispatch, RootState } from '../store'
 import useCustomLogin from './useCustomLogin'
 import { useEffect } from 'react'
 import { getCartItemsAsync, postChangeCartAsync } from '../slices/CartSlice'
+import useZustandMember from '../store/useZustandMember'
+import useZustandCart from '../store/useZustandCart'
 
 function useCustomCart() {
-  const { loginState, loginStatus } = useCustomLogin()
-  const cartItems = useSelector((state: RootState) => state.cartSlice)
-  const dispatch = useDispatch<AppDispatch>()
+  const { member, status: memberStatus } = useZustandMember()
+  const loginState = member
+  const loginStatus = memberStatus
+
+  const { items, requestChangeCart, getItems, status } = useZustandCart()
 
   useEffect(() => {
     if (loginStatus) {
-      dispatch(getCartItemsAsync())
+      getItems()
     }
   }, [loginStatus])
 
@@ -20,7 +24,7 @@ function useCustomCart() {
     let qty = 1
 
     if (cino) {
-      const targetArr = cartItems.items.filter((item) => item.cino === cino)
+      const targetArr = items.filter((item) => item.cino === cino)
       if (targetArr.length > 0) {
         qty = targetArr[0].qty + amount
       }
@@ -31,10 +35,44 @@ function useCustomCart() {
       : { email, pno, qty }
     console.log(requestItem)
 
-    dispatch(postChangeCartAsync(requestItem))
+    requestChangeCart(requestItem)
   }
 
-  return { loginState, loginStatus, cartItems, changeCart }
+  // const { loginState, loginStatus } = useCustomLogin()
+  // const cartItems = useSelector((state: RootState) => state.cartSlice)
+  // const dispatch = useDispatch<AppDispatch>()
+
+  // useEffect(() => {
+  //   if (loginStatus) {
+  //     dispatch(getCartItemsAsync())
+  //   }
+  // }, [loginStatus])
+
+  // const changeCart = (cino: number | null, pno: number, amount: number) => {
+  //   const email = loginState.email
+  //   let qty = 1
+
+  //   if (cino) {
+  //     const targetArr = cartItems.items.filter((item) => item.cino === cino)
+  //     if (targetArr.length > 0) {
+  //       qty = targetArr[0].qty + amount
+  //     }
+  //   }
+
+  //   const requestItem: CartItemRequest = cino
+  //     ? { email, cino, pno, qty }
+  //     : { email, pno, qty }
+  //   console.log(requestItem)
+
+  //   dispatch(postChangeCartAsync(requestItem))
+  // }
+
+  return {
+    loginState,
+    loginStatus,
+    cartItems: { items: items, status: status },
+    changeCart,
+  }
 }
 
 export default useCustomCart
