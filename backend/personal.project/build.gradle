@@ -45,6 +45,9 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.19.0'
+
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation 'com.google.code.gson:gson:2.10.1'
 
