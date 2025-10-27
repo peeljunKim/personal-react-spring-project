@@ -65,7 +65,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        log.info("-----------------JWTCheckFilter.................");
+//        log.info("-----------------JWTCheckFilter.................");
         String authHeaderStr = request.getHeader("Authorization");
 
         try {
@@ -74,7 +74,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             String accessToken = authHeaderStr.substring(7);
             Map<String, Object> claims = JWTUtil.validateToken(accessToken);
 
-            log.info("JWT claims: " + claims);
+//            log.info("JWT claims: " + claims);
 
             String email = (String) claims.get("email");
             String pw = (String) claims.get("pw");
@@ -85,9 +85,9 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             MemberDTO memberDTO = new MemberDTO(email, pw, nickname, social.booleanValue(),
                     roleNames);
 
-            log.info("-----------------------------------");
-            log.info(memberDTO);
-            log.info(memberDTO.getAuthorities());
+//            log.info("-----------------------------------");
+//            log.info(memberDTO);
+//            log.info(memberDTO.getAuthorities());
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(memberDTO, pw, memberDTO.getAuthorities());

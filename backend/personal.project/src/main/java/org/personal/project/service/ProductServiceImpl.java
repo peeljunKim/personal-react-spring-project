@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResponseDTO<ProductDTO> getList(PageRequestDTO pageRequestDTO) {
 
-        log.info("getList..............");
+//        log.info("getList..............");
 
         Pageable pageable = PageRequest.of(
                 pageRequestDTO.getPage() - 1, //페이지 시작 번호가 0부터 시작하므로
