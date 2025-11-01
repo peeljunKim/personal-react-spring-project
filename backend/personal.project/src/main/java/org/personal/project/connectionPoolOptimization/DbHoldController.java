@@ -17,7 +17,7 @@ public class DbHoldController {
 
     @Transactional(readOnly = true)
     @GetMapping("/hold")
-    public String hold(@RequestParam(defaultValue = "0.2") double sec) {
+    public String hold(@RequestParam(defaultValue = "0.1") double sec) {
         dbHoldRepository.hold(sec);
         return "ok";
     }
