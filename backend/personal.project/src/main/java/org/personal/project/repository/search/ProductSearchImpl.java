@@ -45,8 +45,8 @@ public class ProductSearchImpl extends QuerydslRepositorySupport implements Prod
 //        List<Tuple> productList = query.select(product, productImage).fetch(); // select 절을 사용하면 제네릭에 Tuple이 들어감
         long count = query.fetchCount();
 
-        log.info("------------------------------------");
-        log.info(productList);
+//        log.info("------------------------------------");
+//        log.info(productList);
 
         return null;
     }

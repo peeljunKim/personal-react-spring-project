@@ -4,6 +4,7 @@ import org.personal.project.entity.Product;
 import org.personal.project.repository.search.ProductSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     @Query("select p, pi from Product p left join p.imageList pi where pi.ord = 0 and p.delFlag = false")
     Page<Object[]> selectList(Pageable pageable);
+
+    @Query("select p, pi from Product p left join p.imageList pi where pi.ord = 0 and p.delFlag = false")
+    Slice<Object[]> selectListWithoutCount(Pageable pageable);
 }

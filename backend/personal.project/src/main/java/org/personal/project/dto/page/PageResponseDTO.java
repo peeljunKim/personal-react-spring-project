@@ -51,8 +51,31 @@ public class PageResponseDTO<E> {
         }
 
         this.totalPage = this.pageNumList.size();
-
         this.current = pageRequestDTO.getPage();
 
+    }
+
+    @Builder(builderMethodName = "withSlice")
+    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, boolean hasNext) {
+
+        this.dtoList = dtoList;
+        this.pageRequestDTO = pageRequestDTO;
+        this.totalCount = -1;
+
+        int currentPage = pageRequestDTO.getPage();
+        this.current = currentPage;
+
+        this.prev = currentPage > 1;
+        if (this.prev) {
+            this.prevPage = currentPage - 1;
+        }
+
+        this.next = hasNext;
+        if (this.next) {
+            this.nextPage = currentPage + 1;
+        }
+
+        this.pageNumList = List.of(currentPage);
+        this.totalPage = this.pageNumList.size();
     }
 }
