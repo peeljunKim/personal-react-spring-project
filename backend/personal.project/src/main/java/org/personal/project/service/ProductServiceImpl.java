@@ -9,10 +9,7 @@ import org.personal.project.dto.ProductDTO;
 import org.personal.project.entity.Product;
 import org.personal.project.entity.ProductImage;
 import org.personal.project.repository.ProductRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +24,23 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
+    private ProductDTO convertToProductDTO(Object[] arr) {
+        Product product = (Product) arr[0];
+        ProductImage productImage = (ProductImage) arr[1];
+
+        ProductDTO productDTO = ProductDTO.builder()
+                .pno(product.getPno())
+                .pname(product.getPname())
+                .pdesc(product.getPdesc())
+                .price(product.getPrice())
+                .build();
+
+        String imageStr = productImage.getFileName(); // ord 0번만 나오는 이유는 selectList 쿼리에 0번만 나오게 where 절이 있어서
+        productDTO.setUploadedFileNames(List.of(imageStr));
+
+        return productDTO;
+    }
+
     @Override
     public PageResponseDTO<ProductDTO> getList(PageRequestDTO pageRequestDTO) {
 
@@ -38,32 +52,63 @@ public class ProductServiceImpl implements ProductService {
                 Sort.by("pno").descending());
 
         // Object[] => 0 product 1 productImage
-        Page<Object[]> result = productRepository.selectList(pageable);
+//        Page<Object[]> result = productRepository.selectList(pageable);
+//
+//        List<ProductDTO> dtoList = result.get().map(arr -> {
+//
+//            Product product = (Product) arr[0];
+//            ProductImage productImage = (ProductImage) arr[1];
+//
+//            ProductDTO productDTO = ProductDTO.builder()
+//                    .pno(product.getPno())
+//                    .pname(product.getPname())
+//                    .pdesc(product.getPdesc())
+//                    .price(product.getPrice())
+//                    .build();
+//
+//            String imageStr = productImage.getFileName(); // ord 0번만 나오는 이유는 selectList 쿼리에 0번만 나오게 where 절이 있어서
+//            productDTO.setUploadedFileNames(List.of(imageStr));
+//
+//            return productDTO;
+//        }).collect(Collectors.toList());
+//
+//        long count = result.getTotalElements();
+//
+//        return PageResponseDTO.<ProductDTO>withAll()
+//                .dtoList(dtoList)
+//                .totalCount(count)
+//                .pageRequestDTO(pageRequestDTO)
+//                .build();
 
-        List<ProductDTO> dtoList = result.get().map(arr -> {
+        if (!pageRequestDTO.isCount()) {
+            Page<Object[]> result = productRepository.selectList(pageable);
 
-            Product product = (Product) arr[0];
-            ProductImage productImage = (ProductImage) arr[1];
+            List<ProductDTO> dtoList = result.getContent()
+                    .stream()
+                    .map(this::convertToProductDTO)
+                    .collect(Collectors.toList());
 
-            ProductDTO productDTO = ProductDTO.builder()
-                    .pno(product.getPno())
-                    .pname(product.getPname())
-                    .pdesc(product.getPdesc())
-                    .price(product.getPrice())
+            long count = result.getTotalElements();
+
+            return PageResponseDTO.<ProductDTO>withAll()
+                    .dtoList(dtoList)
+                    .totalCount(count)
+                    .pageRequestDTO(pageRequestDTO)
                     .build();
+        }
 
-            String imageStr = productImage.getFileName(); // ord 0번만 나오는 이유는 selectList 쿼리에 0번만 나오게 where 절이 있어서
-            productDTO.setUploadedFileNames(List.of(imageStr));
 
-            return productDTO;
-        }).collect(Collectors.toList());
+        Slice<Object[]> result = productRepository.selectListWithoutCount(pageable);
 
-        long count = result.getTotalElements();
+        List<ProductDTO> dtoList = result.getContent()
+                .stream()
+                .map(this::convertToProductDTO)
+                .collect(Collectors.toList());
 
-        return PageResponseDTO.<ProductDTO>withAll()
+        return PageResponseDTO.<ProductDTO>withSlice()
                 .dtoList(dtoList)
-                .totalCount(count)
                 .pageRequestDTO(pageRequestDTO)
+                .hasNext(result.hasNext())
                 .build();
     }
 

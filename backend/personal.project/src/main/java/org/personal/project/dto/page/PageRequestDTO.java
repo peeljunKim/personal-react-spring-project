@@ -17,6 +17,9 @@ public class PageRequestDTO {
 
     @Builder.Default
     private int size = 10;
+
+    @Builder.Default
+    private boolean count = true;
 }
 
 /**
