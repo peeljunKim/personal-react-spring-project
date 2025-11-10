@@ -28,6 +28,7 @@ public interface ProductService {
                 .pdesc(product.getPdesc())
                 .pname(product.getPname())
                 .delFlag(product.isDelFlag())
+                .createdAt(product.getCreatedAt())
                 .build();
 
         List<ProductImage> imageList = product.getImageList();

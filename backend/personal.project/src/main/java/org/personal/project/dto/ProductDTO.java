@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class ProductDTO {
     private int price;
     private String pdesc; // 설명
     private boolean delFlag; // 삭제 여부
+    private LocalDateTime createdAt;
 
 
     @Builder.Default

@@ -2,7 +2,9 @@ package org.personal.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,10 @@ public class Product {
     private int price;
     private String pdesc;
     private boolean delFlag;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @ElementCollection
     @Builder.Default

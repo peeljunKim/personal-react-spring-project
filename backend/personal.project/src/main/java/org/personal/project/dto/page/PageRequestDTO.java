@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 @Data
 @SuperBuilder
 @AllArgsConstructor
@@ -20,6 +22,14 @@ public class PageRequestDTO {
 
     @Builder.Default
     private boolean count = true;
+
+    // cursor 기반 페이징용
+    private Long cursorId;
+    private LocalDateTime cursorCreatedAt;
+
+    public boolean hasCursor() {
+        return cursorId != null && cursorCreatedAt != null;
+    }
 }
 
 /**

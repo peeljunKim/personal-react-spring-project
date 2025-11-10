@@ -3,6 +3,7 @@ package org.personal.project.dto.page;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,7 +19,11 @@ public class PageResponseDTO<E> {
 
     private boolean prev, next; // 이전, 다음 페이지 존재 여부
 
-    private int totalCount, prevPage, nextPage, totalPage, current;
+    private int totalCount, prevPage, nextPage, totalPage, currentPage;
+
+    private Long nextCursorId;
+
+    private LocalDateTime nextCursorCreatedAt;
 
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
@@ -51,31 +56,42 @@ public class PageResponseDTO<E> {
         }
 
         this.totalPage = this.pageNumList.size();
-        this.current = pageRequestDTO.getPage();
+        this.currentPage = pageRequestDTO.getPage();
 
     }
 
-    @Builder(builderMethodName = "withSlice")
-    public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, boolean hasNext) {
+    @Builder(builderMethodName = "withCursor")
+    public PageResponseDTO(List<E> dtoList,
+                           PageRequestDTO pageRequestDTO,
+                           boolean hasNextPage,
+                           Long nextCursorId,
+                           LocalDateTime nextCursorCreatedAt) {
+        int currentPage = pageRequestDTO.getPage();
 
         this.dtoList = dtoList;
+        this.currentPage = currentPage;
         this.pageRequestDTO = pageRequestDTO;
         this.totalCount = -1;
 
-        int currentPage = pageRequestDTO.getPage();
-        this.current = currentPage;
+        int currentSize = pageRequestDTO.getSize();
+        int currentPageIdx = (currentPage - 1) / currentSize;
 
-        this.prev = currentPage > 1;
-        if (this.prev) {
-            this.prevPage = currentPage - 1;
-        }
+        int startPage = currentPageIdx * currentSize + 1;
+        int endPage = startPage + currentSize - 1;
 
-        this.next = hasNext;
-        if (this.next) {
-            this.nextPage = currentPage + 1;
-        }
+        this.pageNumList = IntStream.rangeClosed(startPage, endPage)
+                .boxed()
+                .collect(Collectors.toList());
 
-        this.pageNumList = List.of(currentPage);
-        this.totalPage = this.pageNumList.size();
+        this.prev = startPage > 1;
+        this.prevPage = this.prev ? startPage - 1 : 0;
+
+        this.next = (currentPage == endPage) && hasNextPage;
+        this.nextPage = this.next ? endPage + 1 : 0;
+
+        this.totalPage = -1;
+
+        this.nextCursorId = nextCursorId;
+        this.nextCursorCreatedAt = nextCursorCreatedAt;
     }
 }
