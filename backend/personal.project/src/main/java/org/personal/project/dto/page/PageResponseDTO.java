@@ -2,6 +2,7 @@ package org.personal.project.dto.page;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,7 @@ public class PageResponseDTO<E> {
 
     private LocalDateTime nextCursorCreatedAt;
 
-    @Builder(builderMethodName = "withAll")
+    @Builder(builderMethodName = "withAll", builderClassName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
 
         this.dtoList = dtoList;
@@ -60,7 +61,7 @@ public class PageResponseDTO<E> {
 
     }
 
-    @Builder(builderMethodName = "withCursor")
+    @Builder(builderMethodName = "withCursor", builderClassName = "withCursor")
     public PageResponseDTO(List<E> dtoList,
                            PageRequestDTO pageRequestDTO,
                            boolean hasNextPage,
