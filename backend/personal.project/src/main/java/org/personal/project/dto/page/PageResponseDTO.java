@@ -26,6 +26,8 @@ public class PageResponseDTO<E> {
 
     private LocalDateTime nextCursorCreatedAt;
 
+    private static final int BLOCK_SIZE = 10; // 한 번에 보여줄 페이지 번호 개수
+
     @Builder(builderMethodName = "withAll", builderClassName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
 
@@ -74,11 +76,16 @@ public class PageResponseDTO<E> {
         this.pageRequestDTO = pageRequestDTO;
         this.totalCount = -1;
 
-        int currentSize = pageRequestDTO.getSize();
-        int currentPageIdx = (currentPage - 1) / currentSize;
+//        int currentSize = pageRequestDTO.getSize();
+//        int currentPageIdx = (currentPage - 1) / currentSize;
 
-        int startPage = currentPageIdx * currentSize + 1;
-        int endPage = startPage + currentSize - 1;
+//        int startPage = currentPageIdx * currentSize + 1;
+//        int endPage = startPage + currentSize - 1;
+
+        int currentBlockIdx = (currentPage - 1) / BLOCK_SIZE;
+
+        int startPage = currentBlockIdx * BLOCK_SIZE + 1;
+        int endPage = startPage + BLOCK_SIZE - 1;
 
         this.pageNumList = IntStream.rangeClosed(startPage, endPage)
                 .boxed()

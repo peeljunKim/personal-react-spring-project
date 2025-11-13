@@ -287,12 +287,12 @@ public class ProductServiceImpl implements ProductService {
 
         int size = pageRequestDTO.getSize();
         int page = pageRequestDTO.getPage();
-        int offset = (page - 1) * size;
+//        int offset = (page - 1) * size;
 
 //        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, size + 1, sort);
 //        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, size + 1); // 문제가 되는 코드
         // DB에서 11개 옴 그중 앞의 10개만 사용자에게 보여줌 그래서 문제가 됨
-        Pageable pageable = OffsetLimitPageRequest.of(offset, size + 1, null);
+        Pageable pageable = OffsetLimitPageRequest.of(page - 1, size, null);
 
         List<Object[]> rows = productRepository.selectListWithoutCount(pageable);
         SeekWindow window = SeekWindow.from(rows, size);
