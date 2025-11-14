@@ -56,12 +56,12 @@ public class ProductController {
 
     @PostMapping("/")
     public Map<String, Long> register(ProductDTO productDTO) {
-        log.info("productDTO: {}", productDTO);
+//        log.info("productDTO: {}", productDTO);
 
         List<String> uploadedFileNames = fileUtil.saveFiles(productDTO.getFiles());
         productDTO.setUploadedFileNames(uploadedFileNames);
 
-        log.info("uploadedFileNames: {}", uploadedFileNames);
+//        log.info("uploadedFileNames: {}", uploadedFileNames);
 
         Long pno = productService.register(productDTO);
 

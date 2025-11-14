@@ -217,9 +217,9 @@ public class ProductServiceImpl implements ProductService {
     public Long register(ProductDTO productDTO) {
         Product product = dtoToEntity(productDTO);
 
-        log.info("--------------------");
-        log.info(product);
-        log.info(product.getImageList());
+//        log.info("--------------------");
+//        log.info(product);
+//        log.info(product.getImageList());
 
         Product result = productRepository.save(product);
 
@@ -314,7 +314,7 @@ public class ProductServiceImpl implements ProductService {
 
     //    private PageResponseDTO<ProductDTO> buildSeekPage(PageRequestDTO pageRequestDTO, Sort sort) {
     private PageResponseDTO<ProductDTO> buildSeekPage(PageRequestDTO pageRequestDTO) {
-        log.info("buildSeekPage 실행");
+//        log.info("buildSeekPage 실행");
         int size = pageRequestDTO.getSize();
 
 //    Pageable pageable = PageRequest.of(0, size + 1, sort);
