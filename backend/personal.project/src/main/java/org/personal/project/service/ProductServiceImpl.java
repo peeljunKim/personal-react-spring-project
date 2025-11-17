@@ -85,9 +85,10 @@ public class ProductServiceImpl implements ProductService {
 
         int currentPage = pageRequestDTO.getPage();
 
+        long offsetRows = (long) (currentPage - 1) * requestedSize;
         // page > 1000 이면 OFFSET은 쓰지 말고 cursor 기반으로 강제
-        if (currentPage > MAX_OFFSET_PAGE) {
-
+//        if (currentPage > MAX_OFFSET_PAGE) {
+        if (offsetRows >= MAX_OFFSET_PAGE) {
             if (!pageRequestDTO.hasCursor()) {
                 // 필요에 따라 예외가 아니라, log.warn 후 buildOffsetPage(...)로 강제 진행해도 됩니다.
                 throw new IllegalArgumentException(
