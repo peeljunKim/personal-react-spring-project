@@ -38,7 +38,7 @@ const ListPage = () => {
     queryKey: ['products/list', page, size],
     queryFn: async () => {
       const res = await jwtAxios.get(
-        `http://localhost:8080/api/products/list?${queryStr}`
+        `http://localhost:8080/api/products/list?${queryStr}&count=false`
       )
 
       return res.data
