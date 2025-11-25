@@ -20,9 +20,9 @@ public class APILoginSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        log.info("----------------");
-        log.info(authentication);
-        log.info("-------------");
+//        log.info("----------------");
+//        log.info(authentication);
+//        log.info("-------------");
 
 
         MemberDTO memberDTO = (MemberDTO) authentication.getPrincipal();
