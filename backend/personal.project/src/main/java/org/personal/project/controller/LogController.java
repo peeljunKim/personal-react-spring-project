@@ -30,5 +30,8 @@ public class LogController {
                 .description("log")
                 .register(meterRegistry)
                 .increment(); // 카운터 값 증가
+
+        // xxx/actuator/prometheus 해당 주소에서 메트릭 확인 가능
+        // 그라파나에서 log_test_total{method="log"} 이런 식으로 사용하면 됨
     }
 }
