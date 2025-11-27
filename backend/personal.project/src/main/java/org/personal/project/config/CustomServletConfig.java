@@ -2,9 +2,11 @@ package org.personal.project.config;
 
 import lombok.extern.log4j.Log4j2;
 import org.personal.project.controller.formatter.LocalDateFormatter;
+import org.personal.project.interceptor.LoggingInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -16,6 +18,13 @@ public class CustomServletConfig implements WebMvcConfigurer {
 
         log.info("addFormatters - LocalDateFormatter 시작");
         registry.addFormatter(new LocalDateFormatter());
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LoggingInterceptor())
+                .addPathPatterns("/**")
+                .order(1);
     }
 
 //    @Override
