@@ -44,11 +44,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
+    // 로깅 관련 라이브러리
+    implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+    implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.19.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation 'net.coobird:thumbnailator:0.4.19'
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+
+
 //    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     annotationProcessor 'org.projectlombok:lombok'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -62,28 +78,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.19.0'
-
-    // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation 'com.google.code.gson:gson:2.10.1'
-
-    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
-    implementation 'org.modelmapper:modelmapper:3.1.1'
-
-    // https://mvnrepository.com/artifact/net.coobird/thumbnailator
-    implementation 'net.coobird:thumbnailator:0.4.19'
-
-    // https://mvnrepository.com/artifact/com.querydsl/querydsl-jpa
-    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
 
     annotationProcessor(
             "jakarta.persistence:jakarta.persistence-api",
