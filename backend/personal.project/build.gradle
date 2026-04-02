@@ -43,6 +43,7 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // 로깅 관련 라이브러리
     implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
