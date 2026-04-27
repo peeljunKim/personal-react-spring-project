@@ -1,0 +1,8 @@
+global:
+  # 그래프 변화를 빨리 보기 위해 5초로 설정 보통 15초를 많이 사용
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "redis_exporter"
+    static_configs:
+      - targets: ["redis-exporter:9121"]
