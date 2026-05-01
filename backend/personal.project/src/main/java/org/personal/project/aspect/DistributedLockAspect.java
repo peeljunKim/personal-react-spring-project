@@ -28,7 +28,6 @@ public class DistributedLockAspect {
      * @return 메서드 실행 결과
      * @throws Throwable 예외 발생 시
      */
-
     @Around("@annotation(org.personal.project.annotation.DistributedLock)")
     public Object lock(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
