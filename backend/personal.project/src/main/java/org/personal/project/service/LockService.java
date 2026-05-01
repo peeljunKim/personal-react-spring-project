@@ -17,11 +17,11 @@ public class LockService {
      * 분산 락을 이용한 처리 메서드
      * <p> -동시에 여러 스레드가 접근하면 하나만 실행되고 나머지는 실패 처리됨
      */
-    @DistributedLock(key = "#userId", waitTime = 5, leaseTime = 10)
+    @DistributedLock(key = "#userId", waitTime = 100, leaseTime = 3000)
     public void executeWithLock(String userId) {
         log.info("락 획득 후 작업 실행");
         try {
-            Thread.sleep(2000); // 락 점유 시간 확보
+            Thread.sleep(1000); // 락 점유 시간 확보
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
