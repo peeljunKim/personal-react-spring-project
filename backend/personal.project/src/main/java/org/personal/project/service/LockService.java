@@ -27,4 +27,15 @@ public class LockService {
         }
         log.info("락을 점유한 작업 종료");
     }
+
+    /**
+     * 분산 락을 이용하지 않은 메서드
+     */
+    public void executeWithoutLock(String userId) {
+        try {
+            Thread.sleep(1000); // 락 점유 시간 확보
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
