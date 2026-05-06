@@ -18,7 +18,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ono;
-    private int amount; // 주문 금액
+    private Integer amount; // 주문 금액
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status; // READY, PAID, CANCEL
