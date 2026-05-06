@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_webhook_logs")
+@Table(name = "tbl_webhook_log")
 @Getter
 @NoArgsConstructor
 public class WebhookLog {

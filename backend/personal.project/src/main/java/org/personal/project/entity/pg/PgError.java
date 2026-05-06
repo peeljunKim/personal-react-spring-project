@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_pg_errors")
+@Table(name = "tbl_pg_error")
 @Getter
 @NoArgsConstructor
 public class PgError {

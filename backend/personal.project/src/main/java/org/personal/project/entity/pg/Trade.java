@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 거래 처리 테이블
  */
 @Entity
-@Table(name = "tbl_trades")
+@Table(name = "tbl_trade")
 @Getter
 @NoArgsConstructor
 public class Trade {

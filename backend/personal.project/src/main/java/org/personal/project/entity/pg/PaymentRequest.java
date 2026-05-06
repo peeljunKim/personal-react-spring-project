@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 결제 요청 테이블
  */
 @Entity
-@Table(name = "tbl_payment_requests")
+@Table(name = "tbl_payment_request")
 @Getter
 @NoArgsConstructor
 public class PaymentRequest {
