@@ -1,10 +1,7 @@
 package org.personal.project.entity;
 
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -28,10 +25,27 @@ public class Member {
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
-    public void addRole(MemberRole memberRole){ memberRoleList.add(memberRole); }
-    public void clearRole(){ memberRoleList.clear(); }
-    public void changeNickname(String nickname) { this.nickname = nickname; }
-    public void changePw(String pw){ this.pw = pw; }
-    public void changeSocial(boolean social) { this.social = social; }
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>();
+
+    public void addRole(MemberRole memberRole) {
+        memberRoleList.add(memberRole);
+    }
+
+    public void clearRole() {
+        memberRoleList.clear();
+    }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changePw(String pw) {
+        this.pw = pw;
+    }
+
+    public void changeSocial(boolean social) {
+        this.social = social;
+    }
 
 }
