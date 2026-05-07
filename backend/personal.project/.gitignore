@@ -28,6 +28,20 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 src/test/
+!src/test/
+src/test/*
+!src/test/java/
+src/test/java/*
+!src/test/java/org/
+src/test/java/org/*
+!src/test/java/org/personal/
+src/test/java/org/personal/*
+!src/test/java/org/personal/project/
+src/test/java/org/personal/project/*
+!src/test/java/org/personal/project/service/
+src/test/java/org/personal/project/service/*
+!src/test/java/org/personal/project/service/payment/
+!src/test/java/org/personal/project/service/payment/StandardWebhookVerifierTest.java
 upload/
 
 ### NetBeans ###
