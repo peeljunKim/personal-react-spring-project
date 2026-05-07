@@ -19,13 +19,11 @@ public class LockService {
      */
     @DistributedLock(key = "#userId", waitTime = 100, leaseTime = 3000)
     public void executeWithLock(String userId) {
-        log.info("락 획득 후 작업 실행");
         try {
             Thread.sleep(1000); // 락 점유 시간 확보
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        log.info("락을 점유한 작업 종료");
     }
 
     /**
