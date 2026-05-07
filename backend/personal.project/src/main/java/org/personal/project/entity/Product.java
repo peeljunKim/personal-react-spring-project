@@ -22,6 +22,8 @@ public class Product {
     private Long pno;
     private String pname;
     private int price;
+    @Builder.Default
+    private int stock = 0;
     private String pdesc;
     private boolean delFlag;
 
@@ -35,6 +37,23 @@ public class Product {
 
     public void changePrice(int price) {
         this.price = price;
+    }
+
+    public void changeStock(int stock) {
+        if (stock < 0) {
+            throw new IllegalArgumentException("재고는 0보다 작을 수 없습니다.");
+        }
+        this.stock = stock;
+    }
+
+    public void decreaseStock(int qty) {
+        if (qty <= 0) {
+            throw new IllegalArgumentException("차감 수량은 0보다 커야 합니다.");
+        }
+        if (this.stock < qty) {
+            throw new IllegalStateException("재고가 부족합니다. productNo=" + this.pno);
+        }
+        this.stock -= qty;
     }
 
     public void changeDesc(String desc) {

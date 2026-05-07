@@ -25,14 +25,14 @@ public class PaymentRequest {
     private Long orderId;       // 가맹점 주문 번호
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", nullable = false)
+    @JoinColumn(name = "merchant_id")
     private Merchant merchant;  // 가맹정 id
 
     @Column(nullable = false)
     private Integer amount;     // 결제 요청 금액
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "method_id", nullable = false)
+    @JoinColumn(name = "method_id")
     private PaymentMethod paymentMethod;  // 결제 수단
 
     @CreationTimestamp
@@ -54,6 +54,13 @@ public class PaymentRequest {
         pr.amount = amount;
         pr.paymentMethod = paymentMethod;
 //        pr.createdAt = LocalDateTime.now();
+        return pr;
+    }
+
+    public static PaymentRequest create(Long orderId, Integer amount) {
+        PaymentRequest pr = new PaymentRequest();
+        pr.orderId = orderId;
+        pr.amount = amount;
         return pr;
     }
 }
