@@ -25,6 +25,7 @@ public interface ProductService {
         ProductDTO productDTO = ProductDTO.builder()
                 .pno(product.getPno())
                 .price(product.getPrice())
+                .stock(product.getStock())
                 .pdesc(product.getPdesc())
                 .pname(product.getPname())
                 .delFlag(product.isDelFlag())
@@ -49,6 +50,7 @@ public interface ProductService {
                 .pname(productDTO.getPname())
                 .pdesc(productDTO.getPdesc())
                 .price(productDTO.getPrice())
+                .stock(productDTO.getStock())
                 .build();
 
         List<String> uploadedFileNames = productDTO.getUploadedFileNames();

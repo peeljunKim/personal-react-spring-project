@@ -1,6 +1,7 @@
 package org.personal.project.controller.advice;
 
 import org.personal.project.util.CustomJWTException;
+import org.personal.project.service.payment.PaymentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -56,5 +57,13 @@ public class CustomControllerAdvice {
         log.error("예외: {}", e.getMessage(), e);
 
         return ResponseEntity.ok().body(Map.of("error", msg));
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    protected ResponseEntity<?> handlePaymentException(PaymentException e) {
+        String msg = e.getMessage();
+        log.error("결제 예외: {}", e.getMessage(), e);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("msg", msg));
     }
 }

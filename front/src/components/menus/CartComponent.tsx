@@ -1,64 +1,59 @@
 import useCustomCart from '../../hooks/useCustomCart'
+import { postCompletePayment, postPreparePayment } from '../../api/PaymentApi'
 import CartItemComponent from '../cart/CartItemComponent'
-
-type PaymentGateway = {
-  init?: (merchantId: string) => void
-  request_pay: (
-    payment: {
-      pg: string
-      pay_method: string
-      merchant_uid: string
-      name: string
-      amount: number
-      buyer_email: string
-    },
-    callback?: (response: unknown) => void
-  ) => void
-}
 
 const CartComponent = () => {
   const { loginState, loginStatus, cartItems, changeCart } = useCustomCart()
   const isLoggedIn = loginStatus === 'fulfilled' && Boolean(loginState.email)
   const hasCartItems = cartItems.items.length > 0
   const canCheckout = isLoggedIn && hasCartItems
-  const totalPrice = cartItems.items.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  )
 
-  const handleClickCheckout = () => {
-    const paymentGateway = (
-      window as Window & {
-        IMP?: PaymentGateway
+  const handleClickCheckout = async () => {
+    try {
+      const preparedPayment = await postPreparePayment()
+      const paymentGateway = window.PortOne
+      // console.log('paymentId', preparedPayment.paymentId)
+
+      // function randomId() {
+      //   return [...crypto.getRandomValues(new Uint32Array(2))]
+      //     .map((word) => word.toString(16).padStart(8, '0'))
+      //     .join('')
+      // }
+      // preparedPayment.paymentId = randomId()
+      // console.log('preparedPayment', preparedPayment)
+
+      if (!paymentGateway?.requestPayment) {
+        window.alert('결제 모듈을 불러오지 못했습니다.')
+        return
       }
-    ).IMP
 
-    if (!paymentGateway?.request_pay) {
-      window.alert('결제 모듈을 불러오지 못했습니다.')
-      return
-    }
+      const paymentResponse = await paymentGateway.requestPayment({
+        storeId: preparedPayment.storeId,
+        channelKey: preparedPayment.channelKey,
+        paymentId: preparedPayment.paymentId,
+        orderName: preparedPayment.orderName,
+        totalAmount: preparedPayment.totalAmount,
+        currency: preparedPayment.currency,
+        payMethod: preparedPayment.payMethod,
+        customer: {
+          email: loginState.email,
+        },
+        noticeUrls: preparedPayment.noticeUrl
+          ? [preparedPayment.noticeUrl]
+          : undefined,
+      })
 
-    const merchantId = import.meta.env.VITE_PG_MERCHANT_ID
-    if (merchantId) {
-      paymentGateway.init?.(merchantId)
-    }
-
-    paymentGateway.request_pay(
-      {
-        pg: 'html5_inicis',
-        pay_method: 'card',
-        merchant_uid: `cart_${Date.now()}`,
-        name:
-          cartItems.items.length === 1
-            ? cartItems.items[0].pname
-            : `${cartItems.items[0].pname} 외 ${cartItems.items.length - 1}건`,
-        amount: totalPrice,
-        buyer_email: loginState.email,
-      },
-      (response) => {
-        console.log('payment response', response)
+      if (paymentResponse?.code) {
+        window.alert(paymentResponse.message ?? '결제가 완료되지 않았습니다.')
+        return
       }
-    )
+
+      const syncedPayment = await postCompletePayment(preparedPayment.paymentId)
+      window.alert(syncedPayment.message)
+    } catch (error) {
+      console.error(error)
+      window.alert('결제 처리 중 오류가 발생했습니다.')
+    }
   }
 
   return (

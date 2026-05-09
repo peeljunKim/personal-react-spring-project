@@ -27,6 +27,7 @@ public class ProductDTO {
     private Long pno;
     private String pname;
     private int price;
+    private int stock;
     private String pdesc; // 설명
     private boolean delFlag; // 삭제 여부
     private LocalDateTime createdAt;

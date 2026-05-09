@@ -1,4 +1,4 @@
-package org.personal.project.service;
+package org.personal.project.poc;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

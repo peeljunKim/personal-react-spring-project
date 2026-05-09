@@ -39,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
                 .pname(product.getPname())
                 .pdesc(product.getPdesc())
                 .price(product.getPrice())
+                .stock(product.getStock())
                 .createdAt(product.getCreatedAt())
                 .build();
 
@@ -246,6 +247,7 @@ public class ProductServiceImpl implements ProductService {
 
         product.changeName(productDTO.getPname());
         product.changePrice(productDTO.getPrice());
+        product.changeStock(productDTO.getStock());
         product.changeDesc(productDTO.getPdesc());
         product.changeDel(productDTO.isDelFlag());
 

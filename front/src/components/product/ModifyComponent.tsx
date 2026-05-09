@@ -178,6 +178,19 @@ function ModifyComponent({ product }: { product: ProductDTO }) {
 
         <div className="flex justify-center">
           <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+            <div className="w-1/5 p-6 text-right font-bold">STOCK</div>
+            <input
+              className="w-4/5 p-6 rounded-r border border-solid border-neutral-300 shadow-md"
+              name="stock"
+              type={'number'}
+              min={0}
+              defaultValue={product.stock}
+            ></input>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <div className="relative mb-4 flex w-full flex-wrap items-stretch">
             <div className="w-1/5 p-6 text-right font-bold">PDESC</div>
             <textarea
               className="w-4/5 p-6 rounded-r border border-solid border-neutral-300 shadow-md resize-y"
