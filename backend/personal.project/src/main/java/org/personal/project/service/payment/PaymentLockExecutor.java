@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+/**
+ * Redis 분산 락 추가
+ * <p>paymentId/상품별 재고 키로 락 세분화</p>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

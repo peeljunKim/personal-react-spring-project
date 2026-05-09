@@ -20,6 +20,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PortOne 조회 후 DB 주문 금액 비교, 불일치/재고 부족 시 즉시 취소 후 롤백
+ */
 @Service
 @Slf4j
 public class PaymentSynchronizer {

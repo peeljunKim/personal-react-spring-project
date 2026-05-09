@@ -17,6 +17,16 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 결제 준비 시 주문/상품 스냅샷 생성
+ * <p>
+ * 상품명이나 가격을 수정할 수 있습니다. 만약 스냅샷을 찍지 않으면 아래 와 같은 문제가 발생
+ * <p>
+ * 상황: 사용자가 '신발'을 50,000원에 결제했는데 그 직후 관리자가 상품 가격을 60,000원으로 올렸습니다
+ * <p>
+ * 문제: 나중에 사용자가 주문 내역을 봤을 때 본인은 50,000원에 샀는데 화면에는 현재 가격인 60,000원이 뜨거나
+ * 데이터 무결성을 지킬 수 있음
+ */
 @Service
 public class PaymentPrepareService {
 

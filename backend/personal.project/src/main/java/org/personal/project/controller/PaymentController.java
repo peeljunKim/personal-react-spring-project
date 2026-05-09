@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
+/**
+ * 결제 API
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payments")
