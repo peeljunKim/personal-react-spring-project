@@ -10,7 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "tbl_order", indexes = {
-        @Index(name = "idx_order_payment_id", columnList = "payment_id")
+        @Index(name = "idx_order_payment_id", columnList = "payment_id"),
+        @Index(name = "idx_order_archive_candidate", columnList = "status, pay_method, created_at, ono")
 })
 @Getter
 @Builder
@@ -25,6 +26,9 @@ public class Order {
 
     @Column(name = "payment_id", unique = true, length = 100)
     private String paymentId;
+
+    @Column(name = "pay_method", length = 50)
+    private String payMethod;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status; // READY, PAID, CANCEL
@@ -48,9 +52,14 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     public static Order ready(Member member, Integer amount) {
+        return ready(member, amount, null);
+    }
+
+    public static Order ready(Member member, Integer amount, String payMethod) {
         Order order = new Order();
         order.member = member;
         order.amount = amount;
+        order.payMethod = payMethod;
         order.status = OrderStatus.READY;
         return order;
     }

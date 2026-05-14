@@ -15,6 +15,7 @@ public class PortOnePaymentProperties {
     private String apiSecret;
     private String storeId;
     private String channelKey;
+    private String payMethod;
     private String webhookUrl;
     private String webhookSecret;
     private boolean webhookSignatureRequired = true;

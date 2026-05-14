@@ -31,13 +31,13 @@ import java.util.UUID;
 public class PaymentPrepareService {
 
     private static final String CURRENCY_KRW = "CURRENCY_KRW";
-    private static final String PAY_METHOD_CARD = "EASY_PAY";
 
     private final CartItemRepository cartItemRepository;
     private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
     private final PaymentLockExecutor lockExecutor;
     private final PortOnePaymentProperties properties;
+    private final PortOnePayMethodResolver payMethodResolver;
     private final TransactionTemplate transactionTemplate;
 
     public PaymentPrepareService(
@@ -46,6 +46,7 @@ public class PaymentPrepareService {
             OrderRepository orderRepository,
             PaymentLockExecutor lockExecutor,
             PortOnePaymentProperties properties,
+            PortOnePayMethodResolver payMethodResolver,
             PlatformTransactionManager transactionManager
     ) {
         this.cartItemRepository = cartItemRepository;
@@ -53,6 +54,7 @@ public class PaymentPrepareService {
         this.orderRepository = orderRepository;
         this.lockExecutor = lockExecutor;
         this.properties = properties;
+        this.payMethodResolver = payMethodResolver;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -76,7 +78,8 @@ public class PaymentPrepareService {
         int totalAmount = calculateAndValidateAmount(cartItems);
         Member member = memberRepository.getReferenceById(email);
 
-        Order order = orderRepository.save(Order.ready(member, totalAmount));
+        String payMethod = resolvePayMethod();
+        Order order = orderRepository.save(Order.ready(member, totalAmount, payMethod));
         String paymentId = "order-" + order.getOno() + "-" + UUID.randomUUID();
         order.assignPaymentId(paymentId);
 
@@ -90,7 +93,7 @@ public class PaymentPrepareService {
                 .orderName(buildOrderName(cartItems))
                 .totalAmount(totalAmount)
                 .currency(CURRENCY_KRW)
-                .payMethod(PAY_METHOD_CARD)
+                .payMethod(payMethod)
                 .storeId(properties.getStoreId())
                 .channelKey(properties.getChannelKey())
                 .noticeUrl(properties.getWebhookUrl())
@@ -132,5 +135,12 @@ public class PaymentPrepareService {
         if (!StringUtils.hasText(properties.getChannelKey())) {
             throw new PaymentException("PORTONE_CHANNEL_KEY 환경 변수가 설정되어 있지 않습니다.");
         }
+        if (!StringUtils.hasText(resolvePayMethod())) {
+            throw new PaymentException("PORTONE_PAY_METHOD 환경 변수가 설정되어 있지 않습니다.");
+        }
+    }
+
+    private String resolvePayMethod() {
+        return payMethodResolver.resolve();
     }
 }
