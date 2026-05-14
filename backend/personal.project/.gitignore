@@ -6,6 +6,9 @@ build/
 !**/src/test/**/build/
 /src/main/resources/*.yml
 /src/main/resources/*.xml
+/src/main/resources/application.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
 
 ### STS ###
 .apt_generated
@@ -42,7 +45,11 @@ src/test/java/org/personal/project/*
 src/test/java/org/personal/project/service/*
 !src/test/java/org/personal/project/service/payment/
 !src/test/java/org/personal/project/service/payment/StandardWebhookVerifierTest.java
+!src/test/java/org/personal/project/service/payment/PortOnePayMethodResolverTest.java
+!src/test/java/org/personal/project/service/orderarchive/
+!src/test/java/org/personal/project/service/orderarchive/*.java
 upload/
+archive/
 
 ### NetBeans ###
 /nbproject/private/
