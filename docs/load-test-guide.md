@@ -32,7 +32,7 @@
 | `POST /api/cart/change`                             |  10% | 장바구니 추가/수량 변경      | DB write, transaction             |
 | `POST /api/payments/prepare`                        |   5% | 주문 스냅샷 생성, Redis lock | Redis lock, DB write, Hikari pool |
 
-`/api/payments/complete`는 PortOne 외부 API 조회와 결제 검증이 포함되므로 로컬 순수 시스템 한계 측정에서는 제외한다. 결제 완료 성능은 외부 API mock 또는 staging에서 별도 측정한다.
+`/api/payments/complete`는 PortOne 외부 API 조회와 결제 검증이 포함되므로 로컬 순수 시스템 한계 측정에서는 제외한다. 즉 결제 완료 성능은 외부 API mock 또는 staging에서 별도 측정한다.
 
 ## 격리된 테스트 데이터 전략
 
