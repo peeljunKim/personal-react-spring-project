@@ -21,6 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 로컬 파일 시스템 기반 업로드 파일 처리 유틸리티입니다.
+ * <p>
+ * 상품 이미지 파일 저장, 썸네일 파일 생성, 파일 조회(Resource 반환), 파일 삭제처럼
+ * 실제 물리 파일 I/O가 필요한 작업을 담당
+ */
 @Component
 @Log4j2
 @RequiredArgsConstructor

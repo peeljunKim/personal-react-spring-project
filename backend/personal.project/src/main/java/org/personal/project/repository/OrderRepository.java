@@ -2,6 +2,7 @@ package org.personal.project.repository;
 
 import org.personal.project.entity.Order;
 import org.personal.project.entity.OrderStatus;
+import org.personal.project.repository.search.OrderSearch;
 import org.personal.project.service.orderarchive.OrderArchiveCandidate;
 import org.personal.project.service.orderarchive.OrderArchiveRecord;
 import org.springframework.data.domain.Pageable;
@@ -12,13 +13,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, OrderSearch {
 
     Optional<Order> findByPaymentId(String paymentId);
 
