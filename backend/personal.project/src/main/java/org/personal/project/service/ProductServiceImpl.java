@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private static final int MAX_OFFSET_PAGE = 1000;
-    private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_OFFSET_PAGE = 1000; // OFFSET 페이징 허용 최대 페이지 기준
+    private static final int MAX_PAGE_SIZE = 100;  // 상품 목록 요청 시 허용하는 최대 페이지 크기
 
     private final ProductRepository productRepository;
 
