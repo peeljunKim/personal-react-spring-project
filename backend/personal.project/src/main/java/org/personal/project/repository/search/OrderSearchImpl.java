@@ -13,6 +13,8 @@ import org.personal.project.entity.QOrder;
 import org.personal.project.entity.QOrderItem;
 import org.personal.project.entity.QProduct;
 import org.personal.project.entity.QProductImage;
+import org.personal.project.entity.pg.QTrade;
+import org.personal.project.entity.pg.Trade;
 import org.personal.project.util.ImageFileNameUtil;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class OrderSearchImpl extends QuerydslRepositorySupport implements OrderSearch {
@@ -43,9 +46,10 @@ public class OrderSearchImpl extends QuerydslRepositorySupport implements OrderS
                 .map(Order::getOno)
                 .toList();
         Map<Long, List<OrderItemDTO>> itemMap = fetchItemMap(orderIds);
+        Map<String, Trade> tradeMap = fetchTradeMap(currentOrders);
 
         List<OrderListDTO> dtoList = currentOrders.stream()
-                .map(order -> toListDTO(order, itemMap.getOrDefault(order.getOno(), List.of())))
+                .map(order -> toListDTO(order, itemMap.getOrDefault(order.getOno(), List.of()), tradeMap.get(order.getPaymentId())))
                 .toList();
 
         Long nextCursorId = null;
@@ -150,14 +154,20 @@ public class OrderSearchImpl extends QuerydslRepositorySupport implements OrderS
         }
         List<OrderItemDTO> items = fetchItemMap(List.of(order.getOno()))
                 .getOrDefault(order.getOno(), List.of());
+        Trade trade = fetchTradeMap(List.of(order)).get(order.getPaymentId());
 
         return Optional.of(OrderDetailDTO.builder()
                 .orderId(order.getOno())
                 .paymentId(order.getPaymentId())
                 .status(order.getStatus())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentProviderStatus(providerStatus(trade))
+                .paymentFailureReason(failureReason(trade))
                 .payMethod(order.getPayMethod())
                 .amount(order.getAmount())
                 .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .paymentVerifiedAt(verifiedAt(trade))
                 .paidAt(order.getPaidAt())
                 .cancelledAt(order.getCancelledAt())
                 .itemCount(items.size())
@@ -165,19 +175,55 @@ public class OrderSearchImpl extends QuerydslRepositorySupport implements OrderS
                 .build());
     }
 
-    private OrderListDTO toListDTO(Order order, List<OrderItemDTO> items) {
+    private OrderListDTO toListDTO(Order order, List<OrderItemDTO> items, Trade trade) {
         return OrderListDTO.builder()
                 .orderId(order.getOno())
                 .paymentId(order.getPaymentId())
                 .status(order.getStatus())
+                .paymentStatus(order.getPaymentStatus())
+                .paymentProviderStatus(providerStatus(trade))
+                .paymentFailureReason(failureReason(trade))
                 .payMethod(order.getPayMethod())
                 .amount(order.getAmount())
                 .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .paymentVerifiedAt(verifiedAt(trade))
                 .paidAt(order.getPaidAt())
                 .cancelledAt(order.getCancelledAt())
                 .itemCount(items.size())
                 .items(items)
                 .build();
+    }
+
+    private Map<String, Trade> fetchTradeMap(List<Order> orders) {
+        List<String> paymentIds = orders.stream()
+                .map(Order::getPaymentId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (paymentIds.isEmpty()) {
+            return Map.of();
+        }
+
+        QTrade trade = QTrade.trade;
+        Map<String, Trade> tradeMap = new LinkedHashMap<>();
+        from(trade)
+                .where(trade.tid.in(paymentIds))
+                .fetch()
+                .forEach(foundTrade -> tradeMap.put(foundTrade.getTid(), foundTrade));
+        return tradeMap;
+    }
+
+    private String providerStatus(Trade trade) {
+        return trade == null ? null : trade.getProviderStatus();
+    }
+
+    private String failureReason(Trade trade) {
+        return trade == null ? null : trade.getFailureReason();
+    }
+
+    private LocalDateTime verifiedAt(Trade trade) {
+        return trade == null ? null : trade.getVerifiedAt();
     }
 
     private OrderItemDTO toItemDTO(Tuple row, QOrderItem orderItem, QProduct product, QProductImage productImage) {

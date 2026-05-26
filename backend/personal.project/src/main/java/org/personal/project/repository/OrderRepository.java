@@ -82,9 +82,14 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderSearch
                 o.ono,
                 o.paymentId,
                 o.status,
+                o.paymentStatus,
+                t.providerStatus,
+                t.failureReason,
                 o.payMethod,
                 o.amount,
                 o.createdAt,
+                o.updatedAt,
+                t.verifiedAt,
                 o.paidAt,
                 o.cancelledAt,
                 o.member.email,
@@ -96,6 +101,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderSearch
                 oi.lineAmount
             )
             from Order o
+            left join Trade t on t.tid = o.paymentId
             left join o.items oi
             left join oi.product p
             where o.ono in :orderIds

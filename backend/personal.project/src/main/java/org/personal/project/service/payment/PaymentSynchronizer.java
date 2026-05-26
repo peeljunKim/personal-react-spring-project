@@ -29,6 +29,7 @@ public class PaymentSynchronizer {
 
     private static final String CANCEL_REASON_AMOUNT_MISMATCH = "ORDER_AMOUNT_MISMATCH";
     private static final String CANCEL_REASON_STOCK_SHORTAGE = "STOCK_SHORTAGE";
+    private static final String CANCEL_REASON_PROVIDER_REJECTED = "PROVIDER_REJECTED";
 
     private final PortOnePaymentClient portOnePaymentClient;
     private final OrderRepository orderRepository;
@@ -87,7 +88,7 @@ public class PaymentSynchronizer {
                     try {
                         return transactionTemplate.execute(status -> applyPaidStatus(paymentId, payment));
                     } catch (PaymentVerificationException e) {
-                        markOrderCancelledAfterRollback(paymentId);
+                        markOrderCancelledAfterRollback(paymentId, payment.status(), e.getMessage());
                         return PaymentSyncResponse.builder()
                                 .paymentId(paymentId)
                                 .paymentStatus(payment.status())
@@ -104,10 +105,14 @@ public class PaymentSynchronizer {
                 .orElseThrow(() -> new PaymentException("주문을 찾을 수 없습니다. paymentId=" + paymentId));
 
         if (payment.isFailedOrCancelled()) {
-            order.markCancelled();
+            order.markPaymentFailed();
             tradeRepository.findByTid(paymentId)
                     .filter(trade -> trade.getStatus() != TradeStatus.APPROVED)
-                    .ifPresent(Trade::fail);
+                    .ifPresent(trade -> trade.fail(payment.status(), CANCEL_REASON_PROVIDER_REJECTED));
+        } else {
+            order.markPaymentPending();
+            tradeRepository.findByTid(paymentId)
+                    .ifPresent(trade -> trade.markProviderPending(payment.status()));
         }
 
         return PaymentSyncResponse.builder()
@@ -146,7 +151,8 @@ public class PaymentSynchronizer {
 
         decreaseStock(order);
         order.markPaid();
-        tradeRepository.findByTid(paymentId).ifPresent(Trade::approve);
+        tradeRepository.findByTid(paymentId)
+                .ifPresent(trade -> trade.approve(payment.status()));
 
         return PaymentSyncResponse.builder()
                 .paymentId(paymentId)
@@ -181,12 +187,13 @@ public class PaymentSynchronizer {
         throw new PaymentVerificationException("포트원 결제 취소 후 DB 트랜잭션을 롤백했습니다. reason=" + reason);
     }
 
-    private void markOrderCancelledAfterRollback(String paymentId) {
+    private void markOrderCancelledAfterRollback(String paymentId, String providerStatus, String failureReason) {
         requiresNewTransactionTemplate.execute(status -> {
-            orderRepository.findByPaymentId(paymentId).ifPresent(Order::markCancelled);
+            orderRepository.findByPaymentId(paymentId)
+                    .ifPresent(Order::markPaymentFailed);
             tradeRepository.findByTid(paymentId)
                     .filter(trade -> trade.getStatus() != TradeStatus.APPROVED)
-                    .ifPresent(Trade::fail);
+                    .ifPresent(trade -> trade.fail(providerStatus, failureReason));
             return null;
         });
     }

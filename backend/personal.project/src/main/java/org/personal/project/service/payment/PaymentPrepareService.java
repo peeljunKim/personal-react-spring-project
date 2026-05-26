@@ -6,9 +6,13 @@ import org.personal.project.entity.CartItem;
 import org.personal.project.entity.Member;
 import org.personal.project.entity.Order;
 import org.personal.project.entity.OrderItem;
+import org.personal.project.entity.pg.PaymentRequest;
+import org.personal.project.entity.pg.Trade;
 import org.personal.project.repository.CartItemRepository;
 import org.personal.project.repository.MemberRepository;
 import org.personal.project.repository.OrderRepository;
+import org.personal.project.repository.PaymentRequestRepository;
+import org.personal.project.repository.TradeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -35,6 +39,8 @@ public class PaymentPrepareService {
     private final CartItemRepository cartItemRepository;
     private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
+    private final PaymentRequestRepository paymentRequestRepository;
+    private final TradeRepository tradeRepository;
     private final PaymentLockExecutor lockExecutor;
     private final PortOnePaymentProperties properties;
     private final PortOnePayMethodResolver payMethodResolver;
@@ -44,6 +50,8 @@ public class PaymentPrepareService {
             CartItemRepository cartItemRepository,
             MemberRepository memberRepository,
             OrderRepository orderRepository,
+            PaymentRequestRepository paymentRequestRepository,
+            TradeRepository tradeRepository,
             PaymentLockExecutor lockExecutor,
             PortOnePaymentProperties properties,
             PortOnePayMethodResolver payMethodResolver,
@@ -52,6 +60,8 @@ public class PaymentPrepareService {
         this.cartItemRepository = cartItemRepository;
         this.memberRepository = memberRepository;
         this.orderRepository = orderRepository;
+        this.paymentRequestRepository = paymentRequestRepository;
+        this.tradeRepository = tradeRepository;
         this.lockExecutor = lockExecutor;
         this.properties = properties;
         this.payMethodResolver = payMethodResolver;
@@ -82,6 +92,8 @@ public class PaymentPrepareService {
         Order order = orderRepository.save(Order.ready(member, totalAmount, payMethod));
         String paymentId = "order-" + order.getOno() + "-" + UUID.randomUUID();
         order.assignPaymentId(paymentId);
+        PaymentRequest paymentRequest = paymentRequestRepository.save(PaymentRequest.create(order.getOno(), totalAmount));
+        tradeRepository.save(Trade.create(paymentRequest, paymentId));
 
         for (CartItem cartItem : cartItems) {
             order.addItem(OrderItem.snapshot(cartItem.getProduct(), cartItem.getQty()));
