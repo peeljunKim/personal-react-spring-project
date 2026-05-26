@@ -44,7 +44,7 @@
 4. `k6/sql/seed-load-test-data.sql`로 테스트 사용자와 상품을 넣는다.
 5. 테스트 종료 후 `DROP DATABASE personal_project_loadtest` 또는 `k6/sql/cleanup-load-test-data.sql`로 정리한다.
 
-테스트 데이터 식별 규칙:
+테스트 데이터 식별 규칙
 
 - 사용자: `lt_local_user_0001@load.local`
 - 사용자 비밀번호: `loadtest1234!`
@@ -52,7 +52,7 @@
 - 상품 이미지 row: `lt_local_product_0001.png`
 - 주문/장바구니 정리 기준: `tbl_order.member_id`, `tbl_cart.member_owner`가 `lt_local_user_%@load.local`
 
-정리 전략 선택:
+정리 전략 선택
 
 | 방식                 | 판단                                                                                      |
 | -------------------- | ----------------------------------------------------------------------------------------- |
@@ -117,7 +117,7 @@ k6 run `
   k6\load-test.js
 ```
 
-빠른 smoke:
+빠른 smoke
 
 ```powershell
 k6 run `
@@ -143,8 +143,6 @@ k6 run `
 | Stress      |      10분 |     220 | 의도적으로 포화 지점 탐색                   |
 | Cooldown    |       5분 |       0 | 회복 시간, pending connection 해소 확인     |
 
-정밀 측정은 위 프로파일을 2회 이상 반복한다. 첫 회는 warm-up 성격으로 버리고, 두 번째 결과를 기준으로 잡는 편이 안전하다.
-
 ## 로컬 리소스 경합 최소화
 
 - k6, 백엔드, DB, Redis가 같은 머신을 공유하므로 결과를 운영 보장 수치로 해석하지 않는다.
@@ -158,7 +156,7 @@ k6 run `
 
 ## 모니터링 명령어
 
-Windows PowerShell:
+Windows PowerShell
 
 ```powershell
 Get-Process java,k6,com.docker.backend -ErrorAction SilentlyContinue |
@@ -175,7 +173,7 @@ jcmd <java-pid> Thread.print
 jcmd <java-pid> GC.heap_info
 ```
 
-Docker/Redis:
+Docker/Redis
 
 ```powershell
 docker stats
@@ -186,7 +184,7 @@ redis-cli -p 6380 INFO memory
 redis-cli -p 6380 SLOWLOG GET 10
 ```
 
-MySQL:
+MySQL
 
 ```sql
 SHOW FULL PROCESSLIST;
@@ -197,7 +195,7 @@ SHOW GLOBAL STATUS LIKE 'Innodb_row_lock%';
 SHOW ENGINE INNODB STATUS\G
 ```
 
-Linux/macOS 참고:
+Linux/macOS 참고
 
 ```bash
 top
@@ -209,7 +207,7 @@ pidstat -p <java-pid> 1
 
 ## Prometheus 핵심 Query
 
-Spring HTTP:
+Spring HTTP
 
 ```promql
 rate(http_server_requests_seconds_count[1m])
@@ -218,7 +216,7 @@ histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket[1m])) by (
 sum(rate(http_server_requests_seconds_count{status=~"5.."}[1m])) / sum(rate(http_server_requests_seconds_count[1m]))
 ```
 
-JVM/Thread/CPU:
+JVM/Thread/CPU
 
 ```promql
 process_cpu_usage
@@ -228,7 +226,7 @@ jvm_threads_live_threads
 jvm_threads_peak_threads
 ```
 
-HikariCP:
+HikariCP
 
 ```promql
 hikaricp_connections_active
@@ -238,7 +236,7 @@ hikaricp_connections_max
 hikaricp_connections_timeout_total
 ```
 
-Redis:
+Redis
 
 ```promql
 rate(redis_commands_processed_total[1m])
@@ -266,7 +264,7 @@ rate(redis_keyspace_misses_total[1m])
    - 짧은 로컬 테스트에서는 메모리가 첫 병목일 가능성은 낮다.
    - 다만 p99 spike와 Full GC가 같이 나오면 heap 또는 allocation 문제로 본다.
 
-판단 기준:
+판단 기준
 
 | 관측                                                         | 해석                                  |
 | ------------------------------------------------------------ | ------------------------------------- |
@@ -277,20 +275,17 @@ rate(redis_keyspace_misses_total[1m])
 | p99 spike와 GC pause 동시 발생                               | JVM memory/GC 병목                    |
 | VU 증가에도 TPS 정체, p95/p99 급증                           | Saturation Point 도달                 |
 
-## 2026-05-16 로컬 Probe 결과
+## 부하 테스트 결과
 
-아래 결과는 공유 DB에 `lt_codex_smoke_` prefix 데이터를 넣고 정리하는 fallback 방식으로 수행한 짧은 로컬 probe다. 테스트 전용 schema 생성은 현재 DB 계정 권한 부족으로 실패했다.
-
-조건:
+조건
 
 - k6 max VU: 120
-- 실행 시간: 2분
-- 사용자: `lt_codex_smoke_user_0001@load.local` ~ `lt_codex_smoke_user_0160@load.local`
-- 상품: `[LOADTEST:lt_codex_smoke]` 고재고 상품 30개
+- 사용자: 160명
+- 상품: 상품 30개
 - 요청 비율: 상품 목록 50%, 상품 상세 25%, 장바구니 조회 10%, 장바구니 변경 10%, 결제 준비 5%
 - Hikari max pool: 16
 
-k6 결과:
+k6 결과
 
 | 지표                   |                        값 |
 | ---------------------- | ------------------------: |
@@ -303,7 +298,7 @@ k6 결과:
 | Error rate             |                        0% |
 | 50% Safety 일일 요청량 | 약 5,983,289 requests/day |
 
-API별 p95:
+API별 p95
 
 | API tag           |       p95 |
 | ----------------- | --------: |
@@ -312,7 +307,7 @@ API별 p95:
 | `cart_change`     | 180.93 ms |
 | `payment_prepare` | 208.22 ms |
 
-Prometheus 관측:
+Prometheus 관측
 
 | 지표                                                              |           값 |
 | ----------------------------------------------------------------- | -----------: |
@@ -324,13 +319,12 @@ Prometheus 관측:
 | `max_over_time(rate(redis_commands_processed_total[1m])[5m:15s])` | 136.17 ops/s |
 | `max_over_time(redis_connected_clients[5m])`                      |            8 |
 
-해석:
+해석
 
 - 이 probe에서는 HTTP 에러와 latency 기준 Saturation Point는 아직 도달하지 않았다.
 - 그러나 Hikari active connection이 max 16까지 도달했고 pending connection이 최대 24까지 관측됐다.
 - CPU는 약 10.9% 수준으로 여유가 있었고 Redis 지표도 낮았다.
 - 따라서 현재 관측된 첫 병목 후보는 CPU, Memory, Redis보다 DB connection pool 또는 DB query 처리량이다.
-- 다음 검증은 `DEV_DB_MAX_POOL_SIZE=32`로 동일 probe를 반복해 p95/p99와 pending connection이 줄어드는지 비교한다. pending이 줄고 TPS가 오르면 pool 부족, pending은 줄어도 DB CPU/slow query가 증가하면 DB 자체 병목으로 판단한다.
 
 ## Saturation Point 탐지 방법
 
@@ -361,7 +355,7 @@ Saturation Point는 단순히 에러가 나는 시점이 아니다. 아래 조�
 
 동시성 추정(Little's Law) = TPS * 평균 응답시간(초)
 
-폐쇄형 VU 모델 근사:
+폐쇄형 VU 모델 근사
 TPS ~= VU / (평균 응답시간 + Think Time)
 
 DAU 추정 = 일일 요청 처리량 / 사용자 1명당 일 평균 요청 수
@@ -371,7 +365,7 @@ DAU 추정 = 일일 요청 처리량 / 사용자 1명당 일 평균 요청 수
 MAU 추정 = DAU / DAU_MAU_Ratio
 ```
 
-예시:
+예시
 
 ```text
 측정 TPS = 120 req/s
@@ -384,7 +378,7 @@ Safety Factor = 50% = 0.5
 일일 주문 준비 처리량 = 119.4 * 0.05 * 86400 * 0.5 = 257,904 orders/day
 ```
 
-Safety Factor 선택:
+Safety Factor 선택
 
 - 70%: 로컬과 운영 사양이 유사하고 p95/p99가 안정적일 때
 - 50%: 일반적인 보수 추정
@@ -401,7 +395,7 @@ Safety Factor 선택:
 - 운영 규모의 connection pool 동작과 차이가 있다.
 - 실제 동시성 상황을 완전히 재현하기 어렵다.
 
-운영 성능 보정 가이드:
+운영 성능 보정 가이드
 
 - 로컬 TPS는 보장 수치가 아니라 상한 추정치로 취급한다.
 - 보수적인 Safety Factor 30%~70%를 적용한다.
