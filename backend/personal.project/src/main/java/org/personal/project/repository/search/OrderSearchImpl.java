@@ -195,6 +195,9 @@ public class OrderSearchImpl extends QuerydslRepositorySupport implements OrderS
                 .build();
     }
 
+    /**
+     * 고객이 자신의 주문/결제 내역 목록을 조회
+     */
     private Map<String, Trade> fetchTradeMap(List<Order> orders) {
         List<String> paymentIds = orders.stream()
                 .map(Order::getPaymentId)
