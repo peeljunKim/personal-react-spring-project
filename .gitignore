@@ -27,3 +27,7 @@ replay_pid*
 
 # Load test outputs
 k6/
+
+docs/
+
+tools/

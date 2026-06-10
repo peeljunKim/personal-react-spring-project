@@ -60,3 +60,5 @@ archive/
 
 ### VS Code ###
 .vscode/
+
+/src/main/java/org/personal/project/poc/
