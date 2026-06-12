@@ -107,35 +107,77 @@ public class RabbitMqConfig {
 
     /**
      *
-     * @return 쿠폰 발급에 필요한 RabbitMQ 리소스를 한 번에 선언
+     * 여기서 선언한 리소스 목록
+     * <p>
+     * - Exchange </br>
+     * - Queue </br>
+     * - 실패 메시지 처리를 위한 Dead Letter Exchange </br>
+     * - 실패 메시지 저장용 Dead Letter Queue </br>
+     * - Exchange와 Queue를 연결하는 Binding </br>
+     *
+     * @return 쿠폰 발급에 필요한 RabbitMQ 리소스를 선언
      */
     @Bean
     public Declarables couponIssueRabbitDeclarables() {
+        /*
+        Exchange는 routing key가 정확히 일치하는 Queue로만 이동
+        durable(true)는 RabbitMQ 서버가 재시작되어도 Exchange가 유지되도록 설정하는 옵션
+         */
         DirectExchange issueExchange = ExchangeBuilder.directExchange(couponIssueProperties.getExchange())
                 .durable(true)
                 .build();
 
+        /*
+        실패한 메시지를 전달받을 Dead Letter Exchange 관련 설정
+
+        Consumer 처리 중 예외가 발생하거나 메시지가 reject/nack 처리되는 경우
+        설정된 DLX 정책에 따라 이 Exchange로 메시지가 이동
+         */
         DirectExchange deadLetterExchange = ExchangeBuilder.directExchange(couponIssueProperties.getDeadLetterExchange())
                 .durable(true)
                 .build();
 
+        /*
+        메시지를 소비할 Queue를 생성 및 실패 시 설정
+
+        x-dead-letter-exchange: Queue에서 처리에 실패한 메시지를 보낼 Dead Letter Exchange를 지정
+        x-dead-letter-routing-key: 실패 메시지가 Dead Letter Exchange로 이동할 때 사용할 routing key를 지정
+         */
         Queue issueQueue = QueueBuilder.durable(couponIssueProperties.getQueue())
                 // Consumer 실패 메시지는 DLX로 이동시키되, DLQ 적재만으로 비즈니스 실패를 확정하지 않습니다.
                 .withArgument("x-dead-letter-exchange", couponIssueProperties.getDeadLetterExchange())
                 .withArgument("x-dead-letter-routing-key", couponIssueProperties.getDeadLetterRoutingKey())
                 .build();
 
+        /*
+        처리 실패한 메시지를 저장할 Dead Letter Queue를 생성
+         */
         Queue deadLetterQueue = QueueBuilder.durable(couponIssueProperties.getDeadLetterQueue())
                 .build();
 
+        /*
+
+        issueExchange와 issueQueue를 routing key로 연결
+
+        Publisher가 issueExchange로 메시지를 발행할 때 routingKey가 couponIssueProperties.getRoutingKey()와 일치하면
+        해당 메시지는 issueQueue로 전달
+         */
         Binding issueBinding = BindingBuilder.bind(issueQueue)
                 .to(issueExchange)
                 .with(couponIssueProperties.getRoutingKey());
 
+        /*
+        Dead Letter Exchange와 Dead Letter Queue를 routing key로 연결 (issueBinding이랑 비슷)
+
+        issueQueue에서 실패한 메시지가 DLX로 이동할 때 deadLetterRoutingKey가 일치하면 deadLetterQueue에 저장
+         */
         Binding deadLetterBinding = BindingBuilder.bind(deadLetterQueue)
                 .to(deadLetterExchange)
                 .with(couponIssueProperties.getDeadLetterRoutingKey());
 
+        /*
+        Spring RabbitMQ 브로커에 해당 리소스들을 자동 전달
+         */
         return new Declarables(
                 issueExchange,
                 deadLetterExchange,
