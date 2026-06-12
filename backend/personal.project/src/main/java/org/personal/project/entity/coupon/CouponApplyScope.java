@@ -1,0 +1,10 @@
+package org.personal.project.entity.coupon;
+
+/**
+ * 쿠폰 적용 범위
+ */
+public enum CouponApplyScope {
+    ORDER,   // 전체 주문 적용
+    PRODUCT, // 특정 상품 적용
+    CATEGORY // 특정 카테고리 적용
+}
