@@ -56,6 +56,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
+//        if (path.startsWith("/actuator/startup")) {
+//            return true;
+//        }
+
 //        if(path.startsWith("/testdb/hold")){
 //            return true;
 //        }
