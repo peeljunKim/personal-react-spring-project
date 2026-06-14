@@ -10,8 +10,16 @@ import java.util.Optional;
 
 public interface CouponMemberIssueCounterRepository extends JpaRepository<CouponMemberIssueCounter, Long> {
 
+    /**
+     * 사용자별 발급 카운터 조회
+     * <p>N회 발급 제한 확인용</p>
+     */
     Optional<CouponMemberIssueCounter> findByPolicyPolicyIdAndMemberEmail(Long policyId, String memberId);
 
+    /**
+     * 사용자별 발급 카운트 증가
+     * <p>현재 카운트가 제한보다 낮을 때만 증가</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponMemberIssueCounter c

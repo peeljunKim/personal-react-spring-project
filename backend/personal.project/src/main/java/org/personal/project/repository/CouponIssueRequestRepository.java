@@ -12,8 +12,16 @@ import java.util.Optional;
 
 public interface CouponIssueRequestRepository extends JpaRepository<CouponIssueRequest, Long> {
 
+    /**
+     * 발급 요청 조회
+     * <p>requestKey 기준 멱등 응답 반환용</p>
+     */
     Optional<CouponIssueRequest> findByRequestKey(String requestKey);
 
+    /**
+     * 발급 요청 처리 시작
+     * <p>PENDING 요청만 PROCESSING으로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueRequest r
@@ -29,6 +37,10 @@ public interface CouponIssueRequestRepository extends JpaRepository<CouponIssueR
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 발급 성공 처리
+     * <p>MemberCoupon 생성 완료 후 사용자 결과 상태 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueRequest r
@@ -45,6 +57,10 @@ public interface CouponIssueRequestRepository extends JpaRepository<CouponIssueR
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 발급 실패 처리
+     * <p>수량 초과, 중복 발급, Consumer 실패 결과 저장</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueRequest r

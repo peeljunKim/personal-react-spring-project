@@ -12,8 +12,16 @@ import java.util.Optional;
 
 public interface OrderCouponRepository extends JpaRepository<OrderCoupon, Long> {
 
+    /**
+     * 주문 쿠폰 조회
+     * <p>결제 동기화/환불 처리 시 주문 기준 조회</p>
+     */
     Optional<OrderCoupon> findByOrderOno(Long orderId);
 
+    /**
+     * 주문 쿠폰 확정
+     * <p>결제 승인 후 RESERVED 상태만 CONFIRMED로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update OrderCoupon c
@@ -29,6 +37,10 @@ public interface OrderCouponRepository extends JpaRepository<OrderCoupon, Long> 
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 주문 쿠폰 예약 해제
+     * <p>결제 실패/시간 초과 시 RESERVED 상태만 RELEASED로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update OrderCoupon c
@@ -44,6 +56,10 @@ public interface OrderCouponRepository extends JpaRepository<OrderCoupon, Long> 
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 주문 쿠폰 복구 완료 처리
+     * <p>환불 시 CONFIRMED 상태만 RESTORED로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update OrderCoupon c

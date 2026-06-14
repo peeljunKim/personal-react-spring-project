@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 
 public interface CouponPolicyRepository extends JpaRepository<CouponPolicy, Long> {
 
+    /**
+     * 전체 발급 수량 확보
+     * <p>발급 기간, 정책 상태, 잔여 수량을 DB 조건으로 한 번에 검증</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponPolicy p

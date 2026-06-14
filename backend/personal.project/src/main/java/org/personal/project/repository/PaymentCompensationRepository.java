@@ -10,6 +10,10 @@ import java.util.List;
 
 public interface PaymentCompensationRepository extends JpaRepository<PaymentCompensation, Long> {
 
+    /**
+     * 보상 재시도 대상 조회
+     * <p>PG 취소 실패 등 재처리에서 사용</p>
+     */
     List<PaymentCompensation> findByStatusInOrderByLastTriedAtAscCreatedAtAsc(
             Collection<PaymentCompensationStatus> statuses,
             Pageable pageable

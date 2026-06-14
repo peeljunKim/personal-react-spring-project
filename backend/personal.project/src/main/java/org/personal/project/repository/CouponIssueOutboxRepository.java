@@ -15,13 +15,25 @@ import java.util.Optional;
 
 public interface CouponIssueOutboxRepository extends JpaRepository<CouponIssueOutbox, Long> {
 
+    /**
+     * Outbox 조회
+     * <p>requestKey 기준 중복 발행 확인용</p>
+     */
     Optional<CouponIssueOutbox> findByRequestKey(String requestKey);
 
+    /**
+     * 발행 대상 Outbox 조회
+     * <p>publisher polling 작업에서 사용</p>
+     */
     List<CouponIssueOutbox> findByStatusInOrderByCreatedAtAsc(
             Collection<CouponIssueOutboxStatus> statuses,
             Pageable pageable
     );
 
+    /**
+     * 메시지 발행 시작
+     * <p>PENDING/재시도 대상만 PUBLISHING으로 선점</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueOutbox o
@@ -38,6 +50,10 @@ public interface CouponIssueOutboxRepository extends JpaRepository<CouponIssueOu
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 메시지 발행 성공 처리
+     * <p>RabbitMQ publisher confirm 성공 시 사용</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueOutbox o
@@ -54,6 +70,10 @@ public interface CouponIssueOutboxRepository extends JpaRepository<CouponIssueOu
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 발행 결과 불명확 처리
+     * <p>confirm timeout 시 즉시 보상하지 않기 위한 상태</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueOutbox o
@@ -69,6 +89,10 @@ public interface CouponIssueOutboxRepository extends JpaRepository<CouponIssueOu
             @Param("reason") String reason
     );
 
+    /**
+     * Outbox 최종 실패 처리
+     * <p>명확한 발행 실패 또는 재처리 한계 도달 시 사용</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update CouponIssueOutbox o

@@ -12,8 +12,16 @@ import java.util.Optional;
 
 public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long> {
 
+    /**
+     * 사용자별 발급 여부 조회
+     * <p>중복 발급 응답 처리 또는 발급 전 사전 확인용</p>
+     */
     Optional<MemberCoupon> findByPolicyPolicyIdAndMemberEmail(Long policyId, String memberId);
 
+    /**
+     * 쿠폰 사용 예약
+     * <p>ISSUED 상태인 쿠폰만 주문에 예약</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update MemberCoupon c
@@ -34,6 +42,10 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 쿠폰 사용 확정
+     * <p>결제 승인 후 RESERVED 상태를 USED로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update MemberCoupon c
@@ -52,6 +64,10 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
             @Param("now") LocalDateTime now
     );
 
+    /**
+     * 쿠폰 예약 해제
+     * <p>결제 실패/시간 초과 시 RESERVED 상태를 ISSUED로 복구</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update MemberCoupon c
@@ -70,6 +86,10 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
             @Param("issuedStatus") MemberCouponStatus issuedStatus
     );
 
+    /**
+     * 환불 후 쿠폰 복구
+     * <p>USED 상태 쿠폰을 정책/기간 기준 상태로 변경</p>
+     */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             update MemberCoupon c
