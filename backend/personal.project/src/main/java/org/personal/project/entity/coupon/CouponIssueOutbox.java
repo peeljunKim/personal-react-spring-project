@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_coupon_issue_outbox_status_created", columnList = "status, created_at"),
         @Index(name = "idx_coupon_issue_outbox_status_last_tried", columnList = "status, last_tried_at")
 }, uniqueConstraints = {
+        // 동일 요청의 RabbitMQ 메시지 중복 발행 방지
         @UniqueConstraint(name = "uk_coupon_issue_outbox_request_key", columnNames = "request_key")
 })
 @Getter

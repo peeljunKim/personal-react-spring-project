@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_order_coupon_member_coupon", columnList = "member_coupon_id"),
         @Index(name = "idx_order_coupon_status", columnList = "status")
 }, uniqueConstraints = {
+        // 결제 한 번에 쿠폰 한 개만 적용
         @UniqueConstraint(name = "uk_order_coupon_order", columnNames = "order_id")
 })
 @Getter

@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_coupon_issue_request_member_status", columnList = "member_id, status"),
         @Index(name = "idx_coupon_issue_request_policy_status", columnList = "policy_id, status")
 }, uniqueConstraints = {
+        // 쿠폰 발급 요청 멱등성 보장(중복 처리 방지)
         @UniqueConstraint(name = "uk_coupon_issue_request_key", columnNames = "request_key")
 })
 @Getter

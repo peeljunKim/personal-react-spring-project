@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 @Table(name = "tbl_coupon_member_issue_counter", indexes = {
         @Index(name = "idx_coupon_member_issue_counter_policy", columnList = "policy_id")
 }, uniqueConstraints = {
+        // 사용자별 N회 발급 카운터 row 중복 생성 방지
         @UniqueConstraint(name = "uk_coupon_member_issue_counter_policy_member", columnNames = {"policy_id", "member_id"})
 })
 @Getter

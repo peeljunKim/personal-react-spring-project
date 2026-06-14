@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_member_coupon_policy_status", columnList = "policy_id, status"),
         @Index(name = "idx_member_coupon_reserved_order", columnList = "reserved_order_id")
 }, uniqueConstraints = {
+        // 사용자별 1회 발급 쿠폰 중복 발급 방지
         @UniqueConstraint(name = "uk_member_coupon_policy_member", columnNames = {"policy_id", "member_id"})
 })
 @Getter
