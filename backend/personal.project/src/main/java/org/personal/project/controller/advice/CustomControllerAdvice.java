@@ -2,6 +2,7 @@ package org.personal.project.controller.advice;
 
 import org.personal.project.util.CustomJWTException;
 import org.personal.project.service.payment.PaymentException;
+import org.personal.project.service.coupon.CouponException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,14 @@ public class CustomControllerAdvice {
     protected ResponseEntity<?> handlePaymentException(PaymentException e) {
         String msg = e.getMessage();
         log.error("결제 예외: {}", e.getMessage(), e);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("msg", msg));
+    }
+
+    @ExceptionHandler(CouponException.class)
+    protected ResponseEntity<?> handleCouponException(CouponException e) {
+        String msg = e.getMessage();
+        log.error("쿠폰 예외: {}", e.getMessage(), e);
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("msg", msg));
     }

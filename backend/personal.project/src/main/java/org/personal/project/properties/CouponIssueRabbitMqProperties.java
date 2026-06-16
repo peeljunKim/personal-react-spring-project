@@ -18,4 +18,5 @@ public class CouponIssueRabbitMqProperties {
     private String deadLetterQueue;
     private String deadLetterRoutingKey;
     private int prefetch;
+    private long confirmTimeoutMillis;
 }

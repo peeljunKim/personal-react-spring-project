@@ -1,4 +1,4 @@
-package org.personal.project.repository;
+package org.personal.project.repository.coupon;
 
 import org.personal.project.entity.pg.PaymentCompensation;
 import org.personal.project.entity.pg.PaymentCompensationStatus;
