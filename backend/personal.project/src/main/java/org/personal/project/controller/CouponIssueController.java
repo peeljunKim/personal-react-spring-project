@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.personal.project.dto.coupon.response.CouponIssueResponse;
 import org.personal.project.dto.coupon.response.CouponIssueStatusResponse;
-import org.personal.project.dto.coupon.requst.EventCouponIssueRequest;
+import org.personal.project.dto.coupon.request.EventCouponIssueRequest;
 import org.personal.project.dto.coupon.response.EventCouponIssueResponse;
 import org.personal.project.service.coupon.CouponIssueService;
 import org.personal.project.service.coupon.EventCouponIssueService;
