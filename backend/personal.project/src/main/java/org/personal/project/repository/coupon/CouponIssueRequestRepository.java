@@ -1,4 +1,4 @@
-package org.personal.project.repository;
+package org.personal.project.repository.coupon;
 
 import org.personal.project.entity.coupon.CouponIssueRequest;
 import org.personal.project.entity.coupon.CouponIssueRequestStatus;
