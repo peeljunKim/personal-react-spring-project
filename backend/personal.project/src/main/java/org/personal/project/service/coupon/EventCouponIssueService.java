@@ -12,6 +12,7 @@ import org.personal.project.entity.coupon.CouponIssueOutbox;
 import org.personal.project.entity.coupon.CouponIssueOutboxStatus;
 import org.personal.project.entity.coupon.CouponIssueRequest;
 import org.personal.project.entity.coupon.CouponIssueRequestStatus;
+import org.personal.project.entity.coupon.CouponIssueType;
 import org.personal.project.entity.coupon.CouponPolicy;
 import org.personal.project.repository.coupon.CouponIssueOutboxRepository;
 import org.personal.project.repository.coupon.CouponIssueRequestRepository;
@@ -81,7 +82,9 @@ public class EventCouponIssueService {
      */
     private EventCouponIssueResponse createIssueRequest(Long policyId, String memberId, String requestKey) {
         try {
-            CouponPolicy policy = couponPolicyRepository.getReferenceById(policyId);
+            CouponPolicy policy = couponPolicyRepository.findById(policyId)
+                    .orElseThrow(() -> new CouponException("쿠폰 정책을 찾을 수 없습니다. policyId=" + policyId));
+            validateFirstComePolicy(policy);
             Member member = memberRepository.getReferenceById(memberId);
             CouponIssueMessage message = new CouponIssueMessage(requestKey, policyId, memberId);
 
@@ -114,6 +117,15 @@ public class EventCouponIssueService {
                     policyId, memberId, requestKey, request.getStatus());
 
             return toEventResponse(request);
+        }
+    }
+
+    /**
+     * 선착순 쿠폰 정책 검증
+     */
+    private void validateFirstComePolicy(CouponPolicy policy) {
+        if (policy.getIssueType() != CouponIssueType.FIRST_COME_FIRST_SERVED) {
+            throw new CouponException("선착순 쿠폰 정책이 아닙니다.");
         }
     }
 

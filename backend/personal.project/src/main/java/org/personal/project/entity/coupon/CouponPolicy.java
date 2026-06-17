@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "tbl_coupon_policy", indexes = {
         @Index(name = "idx_coupon_policy_status", columnList = "status"),
+        @Index(name = "idx_coupon_policy_issue_type", columnList = "issue_type"),
         @Index(name = "idx_coupon_policy_issue_period", columnList = "issue_start_at, issue_end_at"),
         @Index(name = "idx_coupon_policy_use_period", columnList = "use_start_at, use_end_at")
 })
@@ -39,6 +40,11 @@ public class CouponPolicy {
 
     @Column(nullable = false, length = 120)
     private String name;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "issue_type", nullable = false, length = 30)
+    private CouponIssueType issueType = CouponIssueType.GENERAL;
 
     @Column(name = "discount_amount", nullable = false)
     private Integer discountAmount;

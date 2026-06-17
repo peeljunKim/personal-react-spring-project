@@ -39,7 +39,7 @@ public class CouponIssueController {
     public CouponIssueResponse issue(@PathVariable Long policyId, Principal principal) {
         log.info("쿠폰 일반 발급 요청 policyId={}, memberId={}", policyId, principal.getName());
 
-        CouponIssueResponse response = couponIssueService.issue(policyId, principal.getName());
+        CouponIssueResponse response = couponIssueService.issueCoupon(policyId, principal.getName());
 
         log.info("쿠폰 일반 발급 응답 policyId={}, memberId={}, memberCouponId={}, status={}",
                 policyId, principal.getName(), response.memberCouponId(), response.status());

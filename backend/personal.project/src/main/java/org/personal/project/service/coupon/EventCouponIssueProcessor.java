@@ -45,7 +45,7 @@ public class EventCouponIssueProcessor {
         }
 
         try {
-            couponIssueService.issueMemberCoupon(message.policyId(), message.memberId(), message.requestKey());
+            couponIssueService.issueFCFSCoupon(message.policyId(), message.memberId(), message.requestKey());
             couponIssueRequestRepository.markSucceededIfProcessing(
                     message.requestKey(),
                     CouponIssueRequestStatus.PROCESSING,
