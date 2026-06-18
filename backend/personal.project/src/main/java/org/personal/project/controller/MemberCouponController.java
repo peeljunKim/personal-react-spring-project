@@ -44,7 +44,7 @@ public class MemberCouponController {
     }
 
     /**
-     * 사용 가능 쿠폰 조회
+     * 사용 가능 쿠폰 조회 (현재 사용 가능한 쿠폰 조회지 결제에서 적용 가능한 쿠폰 조회가 아님)
      */
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @GetMapping("/usable")
