@@ -98,4 +98,70 @@ public class CouponPolicy {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * 쿠폰 정책 수정
+     */
+    public void updateDraft(
+            String name,
+            CouponIssueType issueType,
+            Integer discountAmount,
+            Integer minOrderAmount,
+            CouponApplyScope applyScope,
+            Integer totalIssueLimit,
+            Integer perMemberIssueLimit,
+            Integer perMemberUseLimit,
+            LocalDateTime issueStartAt,
+            LocalDateTime issueEndAt,
+            LocalDateTime useStartAt,
+            LocalDateTime useEndAt
+    ) {
+        this.name = name;
+        this.issueType = issueType;
+        this.discountAmount = discountAmount;
+        this.minOrderAmount = minOrderAmount;
+        this.applyScope = applyScope;
+        this.totalIssueLimit = totalIssueLimit;
+        this.perMemberIssueLimit = perMemberIssueLimit;
+        this.perMemberUseLimit = perMemberUseLimit;
+        this.issueStartAt = issueStartAt;
+        this.issueEndAt = issueEndAt;
+        this.useStartAt = useStartAt;
+        this.useEndAt = useEndAt;
+    }
+
+    /**
+     * 정책 활성화
+     */
+    public void activate() {
+        this.status = CouponPolicyStatus.ACTIVE;
+    }
+
+    /**
+     * 정책 일시 중지
+     */
+    public void pause() {
+        this.status = CouponPolicyStatus.PAUSED;
+    }
+
+    /**
+     * 정책 재개
+     */
+    public void resume() {
+        this.status = CouponPolicyStatus.ACTIVE;
+    }
+
+    /**
+     * 발급 종료
+     */
+    public void closeIssue() {
+        this.status = CouponPolicyStatus.ISSUE_CLOSED;
+    }
+
+    /**
+     * 정책 취소
+     */
+    public void cancel() {
+        this.status = CouponPolicyStatus.CANCELED;
+    }
 }

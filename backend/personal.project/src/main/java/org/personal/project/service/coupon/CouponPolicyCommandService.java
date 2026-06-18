@@ -2,15 +2,20 @@ package org.personal.project.service.coupon;
 
 import lombok.RequiredArgsConstructor;
 import org.personal.project.dto.coupon.request.CouponPolicyCreateRequest;
+import org.personal.project.dto.coupon.request.CouponPolicyUpdateRequest;
 import org.personal.project.dto.coupon.request.CouponTargetCreateRequest;
 import org.personal.project.dto.coupon.response.CouponPolicyCreateResponse;
+import org.personal.project.dto.coupon.response.CouponPolicyDetailResponse;
+import org.personal.project.dto.coupon.response.CouponPolicyStatusResponse;
 import org.personal.project.entity.coupon.CouponApplyScope;
 import org.personal.project.entity.coupon.CouponPolicy;
 import org.personal.project.entity.coupon.CouponPolicyStatus;
 import org.personal.project.entity.coupon.CouponTarget;
 import org.personal.project.entity.coupon.CouponTargetType;
+import org.personal.project.entity.coupon.MemberCouponStatus;
 import org.personal.project.repository.coupon.CouponPolicyRepository;
 import org.personal.project.repository.coupon.CouponTargetRepository;
+import org.personal.project.repository.coupon.MemberCouponRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 쿠폰 정책 명령 처리
+ * 쿠폰 정책 처리
  */
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ public class CouponPolicyCommandService {
 
     private final CouponPolicyRepository couponPolicyRepository;
     private final CouponTargetRepository couponTargetRepository;
+    private final MemberCouponRepository memberCouponRepository;
 
     /**
      * 쿠폰 정책 생성
@@ -76,10 +82,176 @@ public class CouponPolicyCommandService {
     }
 
     /**
+     * 쿠폰 정책 수정
+     */
+    @Transactional
+    public CouponPolicyDetailResponse updatePolicy(Long policyId, CouponPolicyUpdateRequest request) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy, CouponPolicyStatus.DRAFT);
+
+        List<CouponTargetCreateRequest> targets = normalizeTargets(request.targets());
+        validatePeriod(request.issueStartAt(), request.issueEndAt(), request.useStartAt(), request.useEndAt());
+        validateTargets(request.applyScope(), targets);
+
+        policy.updateDraft(
+                request.name(),
+                request.issueType(),
+                request.discountAmount(),
+                request.minOrderAmount(),
+                request.applyScope(),
+                request.totalIssueLimit(),
+                request.perMemberIssueLimit(),
+                request.perMemberUseLimit(),
+                request.issueStartAt(),
+                request.issueEndAt(),
+                request.useStartAt(),
+                request.useEndAt()
+        );
+
+        couponTargetRepository.deleteByPolicyPolicyId(policyId);
+        couponTargetRepository.flush();
+        saveTargets(policy, targets);
+
+        return CouponPolicyMapper.toDetailResponse(
+                policy,
+                couponTargetRepository.findByPolicyPolicyId(policyId)
+        );
+    }
+
+    /**
+     * 쿠폰 정책 활성화
+     */
+    @Transactional
+    public CouponPolicyStatusResponse activate(Long policyId) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy, CouponPolicyStatus.DRAFT);
+        policy.activate();
+        return toStatusResponse(policy, 0, "쿠폰 정책 활성화 완료");
+    }
+
+    /**
+     * 쿠폰 정책 일시 중지
+     */
+    @Transactional
+    public CouponPolicyStatusResponse pause(Long policyId) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy, CouponPolicyStatus.ACTIVE);
+        policy.pause();
+        return toStatusResponse(policy, 0, "쿠폰 정책 일시 중지 완료");
+    }
+
+    /**
+     * 쿠폰 정책 재개
+     */
+    @Transactional
+    public CouponPolicyStatusResponse resume(Long policyId) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy, CouponPolicyStatus.PAUSED);
+        policy.resume();
+        return toStatusResponse(policy, 0, "쿠폰 정책 재개 완료");
+    }
+
+    /**
+     * 쿠폰 발급 종료
+     */
+    @Transactional
+    public CouponPolicyStatusResponse closeIssue(Long policyId) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy, CouponPolicyStatus.ACTIVE, CouponPolicyStatus.PAUSED);
+        policy.closeIssue();
+        return toStatusResponse(policy, 0, "쿠폰 발급 종료 완료");
+    }
+
+    /**
+     * 쿠폰 정책 취소
+     */
+    @Transactional
+    public CouponPolicyStatusResponse cancel(Long policyId) {
+        CouponPolicy policy = getPolicy(policyId);
+        validateStatus(policy,
+                CouponPolicyStatus.DRAFT,
+                CouponPolicyStatus.ACTIVE,
+                CouponPolicyStatus.PAUSED,
+                CouponPolicyStatus.ISSUE_CLOSED);
+
+        boolean hasReservedCoupon = memberCouponRepository.existsByPolicyPolicyIdAndStatus(
+                policyId,
+                MemberCouponStatus.RESERVED
+        );
+        if (hasReservedCoupon) {
+            throw new CouponException("예약 중인 쿠폰이 있어 정책을 취소할 수 없습니다.");
+        }
+
+        int affectedCouponCount = memberCouponRepository.cancelIssuedCouponsByPolicyId(
+                policyId,
+                MemberCouponStatus.ISSUED,
+                MemberCouponStatus.CANCELED,
+                LocalDateTime.now()
+        );
+        policy.cancel();
+
+        return toStatusResponse(policy, affectedCouponCount, "쿠폰 정책 취소 완료");
+    }
+
+    /**
+     * 쿠폰 정책 조회
+     */
+    private CouponPolicy getPolicy(Long policyId) {
+        return couponPolicyRepository.findById(policyId)
+                .orElseThrow(() -> new CouponException("쿠폰 정책을 찾을 수 없습니다. policyId=" + policyId));
+    }
+
+    /**
+     * 정책 상태 검증
+     */
+    private void validateStatus(CouponPolicy policy, CouponPolicyStatus... allowedStatuses) {
+        for (CouponPolicyStatus allowedStatus : allowedStatuses) {
+            if (policy.getStatus() == allowedStatus) {
+                return;
+            }
+        }
+        throw new CouponException("현재 상태에서는 처리할 수 없는 쿠폰 정책입니다. status=" + policy.getStatus());
+    }
+
+    /**
+     * 정책 상태 응답 변환
+     */
+    private CouponPolicyStatusResponse toStatusResponse(
+            CouponPolicy policy,
+            Integer affectedCouponCount,
+            String message
+    ) {
+        return new CouponPolicyStatusResponse(
+                policy.getPolicyId(),
+                policy.getStatus().name(),
+                affectedCouponCount,
+                message
+        );
+    }
+
+    /**
      * 적용 대상 목록 정규화
      */
     private List<CouponTargetCreateRequest> normalizeTargets(List<CouponTargetCreateRequest> targets) {
         return targets == null ? List.of() : targets;
+    }
+
+    /**
+     * 적용 대상 저장
+     */
+    private void saveTargets(CouponPolicy policy, List<CouponTargetCreateRequest> targets) {
+        if (targets.isEmpty()) {
+            return;
+        }
+
+        List<CouponTarget> couponTargets = targets.stream()
+                .map(target -> CouponTarget.builder()
+                        .policy(policy)
+                        .targetType(target.targetType())
+                        .targetRefId(target.targetRefId())
+                        .build())
+                .toList();
+        couponTargetRepository.saveAll(couponTargets);
     }
 
     /**

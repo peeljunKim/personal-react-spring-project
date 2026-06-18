@@ -2,12 +2,17 @@ package org.personal.project.repository.coupon;
 
 import org.personal.project.entity.coupon.MemberCoupon;
 import org.personal.project.entity.coupon.MemberCouponStatus;
+import org.personal.project.entity.coupon.CouponPolicyStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long> {
@@ -17,6 +22,71 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
      * <p>중복 발급 응답 처리 또는 발급 전 사전 확인용</p>
      */
     Optional<MemberCoupon> findByPolicyPolicyIdAndMemberEmail(Long policyId, String memberId);
+
+    /**
+     * 내 쿠폰함 전체 조회
+     */
+    @EntityGraph(attributePaths = {"policy"})
+    Page<MemberCoupon> findByMemberEmail(String memberId, Pageable pageable);
+
+    /**
+     * 내 쿠폰함 상태별 조회
+     */
+    @EntityGraph(attributePaths = {"policy"})
+    Page<MemberCoupon> findByMemberEmailAndStatusIn(
+            String memberId,
+            Collection<MemberCouponStatus> statuses,
+            Pageable pageable
+    );
+
+    /**
+     * 사용 가능 쿠폰 조회
+     */
+    @EntityGraph(attributePaths = {"policy"})
+    @Query("""
+            select c
+              from MemberCoupon c
+             where c.member.email = :memberId
+               and c.status = :issuedStatus
+               and c.policy.status in :policyStatuses
+               and c.policy.useStartAt <= :now
+               and c.policy.useEndAt > :now
+            """)
+    Page<MemberCoupon> findUsableCoupons(
+            @Param("memberId") String memberId,
+            @Param("issuedStatus") MemberCouponStatus issuedStatus,
+            @Param("policyStatuses") Collection<CouponPolicyStatus> policyStatuses,
+            @Param("now") LocalDateTime now,
+            Pageable pageable
+    );
+
+    /**
+     * 금액 기준 적용 가능 쿠폰 조회
+     */
+    @EntityGraph(attributePaths = {"policy"})
+    @Query("""
+            select c
+              from MemberCoupon c
+             where c.member.email = :memberId
+               and c.status = :issuedStatus
+               and c.policy.status in :policyStatuses
+               and c.policy.useStartAt <= :now
+               and c.policy.useEndAt > :now
+               and c.policy.minOrderAmount <= :orderAmount
+            """)
+    Page<MemberCoupon> findApplicableCouponsByAmount(
+            @Param("memberId") String memberId,
+            @Param("issuedStatus") MemberCouponStatus issuedStatus,
+            @Param("policyStatuses") Collection<CouponPolicyStatus> policyStatuses,
+            @Param("now") LocalDateTime now,
+            @Param("orderAmount") Integer orderAmount,
+            Pageable pageable
+    );
+
+    /**
+     * 정책별 예약 쿠폰 존재 여부
+     */
+    boolean existsByPolicyPolicyIdAndStatus(Long policyId, MemberCouponStatus status);
 
     /**
      * 쿠폰 사용 예약
@@ -107,6 +177,25 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
             @Param("usedStatus") MemberCouponStatus usedStatus,
             @Param("nextStatus") MemberCouponStatus nextStatus,
             @Param("expiredStatus") MemberCouponStatus expiredStatus,
+            @Param("canceledStatus") MemberCouponStatus canceledStatus,
+            @Param("now") LocalDateTime now
+    );
+
+    /**
+     * 발급된 쿠폰 일괄 회수
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update MemberCoupon c
+               set c.status = :canceledStatus,
+                   c.canceledAt = :now,
+                   c.version = c.version + 1
+             where c.policy.policyId = :policyId
+               and c.status = :issuedStatus
+            """)
+    int cancelIssuedCouponsByPolicyId(
+            @Param("policyId") Long policyId,
+            @Param("issuedStatus") MemberCouponStatus issuedStatus,
             @Param("canceledStatus") MemberCouponStatus canceledStatus,
             @Param("now") LocalDateTime now
     );
