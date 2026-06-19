@@ -50,7 +50,9 @@ public class CouponAdminController {
     }
 
     /**
-     * 특정 사용자 쿠폰 전체 조회
+     * 사용자 쿠폰 운영 조회
+     * <p>
+     * memberId/status/policyId 조합으로 동적 조회 가능
      */
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/member-coupons")
@@ -102,6 +104,8 @@ public class CouponAdminController {
 
     /**
      * 쿠폰 정책 활성화
+     * DRAFT -> ACTIVE
+     * 쿠폰 상태 변화?를 하나로 합칠 수 있는데 현재 상황을 유지하는게 더 좋은 것 같아서 유지
      */
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @PatchMapping("/{policyId}/activate")

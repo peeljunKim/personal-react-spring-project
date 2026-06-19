@@ -51,7 +51,7 @@ public class MemberCouponQueryService {
     }
 
     /**
-     * 금액 기준 적용 가능 쿠폰 조회
+     * 금액 기준 적용 가능 쿠폰 조회 (상품/카테고리 유효성 검사는 아직 장바구니 단계에서 처리해야 될 것 같음)
      */
     @Transactional(readOnly = true)
     public List<CouponApplicabilityResponse> getApplicableCoupons(
@@ -72,7 +72,7 @@ public class MemberCouponQueryService {
     }
 
     /**
-     * 관리자 사용자 쿠폰 전체 조회
+     * 관리자 사용자 쿠폰 조회
      */
     @Transactional(readOnly = true)
     public PageResponseDTO<MemberCouponResponse> getAdminMemberCoupons(

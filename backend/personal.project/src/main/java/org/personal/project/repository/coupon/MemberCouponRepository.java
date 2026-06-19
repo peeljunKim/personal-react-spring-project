@@ -86,6 +86,8 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
 
     /**
      * 관리자 사용자 쿠폰 조회
+     *
+     * 단 파라미터에 null 값이 오면 해당 조건 제외
      */
     @EntityGraph(attributePaths = {"policy"})
     @Query("""
