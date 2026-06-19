@@ -50,6 +50,7 @@ src/test/java/org/personal/project/service/*
 !src/test/java/org/personal/project/service/orderarchive/*.java
 upload/
 archive/
+logs/
 
 ### NetBeans ###
 /nbproject/private/
