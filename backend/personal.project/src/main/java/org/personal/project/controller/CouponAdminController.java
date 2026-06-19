@@ -50,7 +50,7 @@ public class CouponAdminController {
     }
 
     /**
-     * 사용자 쿠폰 전체 조회
+     * 특정 사용자 쿠폰 전체 조회
      */
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     @GetMapping("/member-coupons")
