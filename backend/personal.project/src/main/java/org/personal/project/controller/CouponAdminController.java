@@ -9,10 +9,13 @@ import org.personal.project.dto.coupon.response.CouponPolicyCreateResponse;
 import org.personal.project.dto.coupon.response.CouponPolicyDetailResponse;
 import org.personal.project.dto.coupon.response.CouponPolicyStatusResponse;
 import org.personal.project.dto.coupon.response.CouponPolicySummaryResponse;
+import org.personal.project.dto.coupon.response.MemberCouponResponse;
 import org.personal.project.dto.page.PageRequestDTO;
 import org.personal.project.dto.page.PageResponseDTO;
+import org.personal.project.entity.coupon.MemberCouponStatus;
 import org.personal.project.service.coupon.CouponPolicyCommandService;
 import org.personal.project.service.coupon.CouponPolicyQueryService;
+import org.personal.project.service.coupon.MemberCouponQueryService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -34,6 +38,7 @@ public class CouponAdminController {
 
     private final CouponPolicyCommandService couponPolicyCommandService;
     private final CouponPolicyQueryService couponPolicyQueryService;
+    private final MemberCouponQueryService memberCouponQueryService;
 
     /**
      * 쿠폰 정책 목록 조회
@@ -42,6 +47,20 @@ public class CouponAdminController {
     @GetMapping
     public PageResponseDTO<CouponPolicySummaryResponse> getPolicies(PageRequestDTO pageRequestDTO) {
         return couponPolicyQueryService.getPolicies(pageRequestDTO);
+    }
+
+    /**
+     * 사용자 쿠폰 전체 조회
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @GetMapping("/member-coupons")
+    public PageResponseDTO<MemberCouponResponse> getMemberCoupons(
+            @RequestParam(required = false) String memberId,
+            @RequestParam(required = false) MemberCouponStatus status,
+            @RequestParam(required = false) Long policyId,
+            PageRequestDTO pageRequestDTO
+    ) {
+        return memberCouponQueryService.getAdminMemberCoupons(memberId, status, policyId, pageRequestDTO);
     }
 
     /**

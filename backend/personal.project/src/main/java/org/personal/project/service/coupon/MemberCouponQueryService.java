@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 사용자 쿠폰함 조회 처리
+ * 사용자/관리자 쿠폰 조회 처리
  */
 @Service
 @RequiredArgsConstructor
@@ -33,84 +33,58 @@ public class MemberCouponQueryService {
             CouponPolicyStatus.ISSUE_CLOSED
     );
 
-    private static final List<MemberCouponStatus> HISTORY_STATUSES = List.of(
-            MemberCouponStatus.USED,
-            MemberCouponStatus.EXPIRED,
-            MemberCouponStatus.CANCELED
-    );
-
     private final MemberCouponRepository memberCouponRepository;
 
     /**
-     * 내 쿠폰함 전체 조회
+     * 지금 사용 가능 쿠폰 조회
      */
     @Transactional(readOnly = true)
-    public PageResponseDTO<MemberCouponResponse> getMyCoupons(
-            String memberId,
-            MemberCouponStatus status,
-            PageRequestDTO pageRequestDTO
-    ) {
-        Pageable pageable = toPageable(pageRequestDTO);
-        Page<MemberCoupon> result = status == null
-                ? memberCouponRepository.findByMemberEmail(memberId, pageable)
-                : memberCouponRepository.findByMemberEmailAndStatusIn(memberId, List.of(status), pageable);
-
-        return toMemberCouponPage(result, pageRequestDTO);
-    }
-
-    /**
-     * 사용 가능 쿠폰 조회
-     */
-    @Transactional(readOnly = true)
-    public PageResponseDTO<MemberCouponResponse> getUsableCoupons(String memberId, PageRequestDTO pageRequestDTO) {
-        Page<MemberCoupon> result = memberCouponRepository.findUsableCoupons(
+    public List<MemberCouponResponse> getMyCoupons(String memberId) {
+        List<MemberCoupon> result = memberCouponRepository.findUsableCoupons(
                 memberId,
                 MemberCouponStatus.ISSUED,
                 USABLE_POLICY_STATUSES,
-                LocalDateTime.now(),
-                toPageable(pageRequestDTO)
+                LocalDateTime.now()
         );
 
-        return toMemberCouponPage(result, pageRequestDTO);
+        return toMemberCouponList(result);
     }
 
     /**
      * 금액 기준 적용 가능 쿠폰 조회
      */
     @Transactional(readOnly = true)
-    public PageResponseDTO<CouponApplicabilityResponse> getApplicableCoupons(
+    public List<CouponApplicabilityResponse> getApplicableCoupons(
             String memberId,
-            Integer orderAmount,
-            PageRequestDTO pageRequestDTO
+            Integer orderAmount
     ) {
-        Page<MemberCoupon> result = memberCouponRepository.findApplicableCouponsByAmount(
+        List<MemberCoupon> result = memberCouponRepository.findApplicableCouponsByAmount(
                 memberId,
                 MemberCouponStatus.ISSUED,
                 USABLE_POLICY_STATUSES,
                 LocalDateTime.now(),
-                orderAmount,
-                toPageable(pageRequestDTO)
+                orderAmount
         );
 
-        List<CouponApplicabilityResponse> dtoList = result.getContent().stream()
+        return result.stream()
                 .map(this::toApplicabilityResponse)
                 .toList();
-
-        return PageResponseDTO.<CouponApplicabilityResponse>withAll()
-                .dtoList(dtoList)
-                .pageRequestDTO(pageRequestDTO)
-                .totalCount(result.getTotalElements())
-                .build();
     }
 
     /**
-     * 쿠폰 사용 이력 조회
+     * 관리자 사용자 쿠폰 전체 조회
      */
     @Transactional(readOnly = true)
-    public PageResponseDTO<MemberCouponResponse> getCouponHistory(String memberId, PageRequestDTO pageRequestDTO) {
-        Page<MemberCoupon> result = memberCouponRepository.findByMemberEmailAndStatusIn(
+    public PageResponseDTO<MemberCouponResponse> getAdminMemberCoupons(
+            String memberId,
+            MemberCouponStatus status,
+            Long policyId,
+            PageRequestDTO pageRequestDTO
+    ) {
+        Page<MemberCoupon> result = memberCouponRepository.findAdminMemberCoupons(
                 memberId,
-                HISTORY_STATUSES,
+                status,
+                policyId,
                 toPageable(pageRequestDTO)
         );
 
@@ -118,7 +92,16 @@ public class MemberCouponQueryService {
     }
 
     /**
-     * 사용자 쿠폰 페이지 변환
+     * 사용자 쿠폰 목록 변환
+     */
+    private List<MemberCouponResponse> toMemberCouponList(List<MemberCoupon> result) {
+        return result.stream()
+                .map(this::toMemberCouponResponse)
+                .toList();
+    }
+
+    /**
+     * 관리자 사용자 쿠폰 페이지 변환
      */
     private PageResponseDTO<MemberCouponResponse> toMemberCouponPage(
             Page<MemberCoupon> result,

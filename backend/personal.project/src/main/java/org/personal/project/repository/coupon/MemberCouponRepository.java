@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long> {
@@ -46,18 +47,18 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
     @Query("""
             select c
               from MemberCoupon c
-             where c.member.email = :memberId
+            where c.member.email = :memberId
                and c.status = :issuedStatus
                and c.policy.status in :policyStatuses
                and c.policy.useStartAt <= :now
                and c.policy.useEndAt > :now
+             order by c.policy.useEndAt asc, c.issuedAt desc
             """)
-    Page<MemberCoupon> findUsableCoupons(
+    List<MemberCoupon> findUsableCoupons(
             @Param("memberId") String memberId,
             @Param("issuedStatus") MemberCouponStatus issuedStatus,
             @Param("policyStatuses") Collection<CouponPolicyStatus> policyStatuses,
-            @Param("now") LocalDateTime now,
-            Pageable pageable
+            @Param("now") LocalDateTime now
     );
 
     /**
@@ -73,13 +74,31 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
                and c.policy.useStartAt <= :now
                and c.policy.useEndAt > :now
                and c.policy.minOrderAmount <= :orderAmount
+             order by c.policy.useEndAt asc, c.issuedAt desc
             """)
-    Page<MemberCoupon> findApplicableCouponsByAmount(
+    List<MemberCoupon> findApplicableCouponsByAmount(
             @Param("memberId") String memberId,
             @Param("issuedStatus") MemberCouponStatus issuedStatus,
             @Param("policyStatuses") Collection<CouponPolicyStatus> policyStatuses,
             @Param("now") LocalDateTime now,
-            @Param("orderAmount") Integer orderAmount,
+            @Param("orderAmount") Integer orderAmount
+    );
+
+    /**
+     * 관리자 사용자 쿠폰 조회
+     */
+    @EntityGraph(attributePaths = {"policy"})
+    @Query("""
+            select c
+              from MemberCoupon c
+             where (:memberId is null or c.member.email = :memberId)
+               and (:status is null or c.status = :status)
+               and (:policyId is null or c.policy.policyId = :policyId)
+            """)
+    Page<MemberCoupon> findAdminMemberCoupons(
+            @Param("memberId") String memberId,
+            @Param("status") MemberCouponStatus status,
+            @Param("policyId") Long policyId,
             Pageable pageable
     );
 
