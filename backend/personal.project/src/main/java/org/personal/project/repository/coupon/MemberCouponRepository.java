@@ -62,27 +62,10 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
     );
 
     /**
-     * 금액 기준 적용 가능 쿠폰 조회
+     * 사용자 쿠폰 단건 조회
      */
     @EntityGraph(attributePaths = {"policy"})
-    @Query("""
-            select c
-              from MemberCoupon c
-             where c.member.email = :memberId
-               and c.status = :issuedStatus
-               and c.policy.status in :policyStatuses
-               and c.policy.useStartAt <= :now
-               and c.policy.useEndAt > :now
-               and c.policy.minOrderAmount <= :orderAmount
-             order by c.policy.useEndAt asc, c.issuedAt desc
-            """)
-    List<MemberCoupon> findApplicableCouponsByAmount(
-            @Param("memberId") String memberId,
-            @Param("issuedStatus") MemberCouponStatus issuedStatus,
-            @Param("policyStatuses") Collection<CouponPolicyStatus> policyStatuses,
-            @Param("now") LocalDateTime now,
-            @Param("orderAmount") Integer orderAmount
-    );
+    Optional<MemberCoupon> findByMemberCouponIdAndMemberEmail(Long memberCouponId, String memberId);
 
     /**
      * 관리자 사용자 쿠폰 조회

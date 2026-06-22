@@ -1,11 +1,9 @@
 package org.personal.project.service.coupon;
 
 import lombok.RequiredArgsConstructor;
-import org.personal.project.dto.coupon.response.CouponApplicabilityResponse;
 import org.personal.project.dto.coupon.response.MemberCouponResponse;
 import org.personal.project.dto.page.PageRequestDTO;
 import org.personal.project.dto.page.PageResponseDTO;
-import org.personal.project.entity.coupon.CouponApplyScope;
 import org.personal.project.entity.coupon.CouponPolicy;
 import org.personal.project.entity.coupon.CouponPolicyStatus;
 import org.personal.project.entity.coupon.MemberCoupon;
@@ -48,27 +46,6 @@ public class MemberCouponQueryService {
         );
 
         return toMemberCouponList(result);
-    }
-
-    /**
-     * 금액 기준 적용 가능 쿠폰 조회 (상품/카테고리 유효성 검사는 아직 장바구니 단계에서 처리해야 될 것 같음)
-     */
-    @Transactional(readOnly = true)
-    public List<CouponApplicabilityResponse> getApplicableCoupons(
-            String memberId,
-            Integer orderAmount
-    ) {
-        List<MemberCoupon> result = memberCouponRepository.findApplicableCouponsByAmount(
-                memberId,
-                MemberCouponStatus.ISSUED,
-                USABLE_POLICY_STATUSES,
-                LocalDateTime.now(),
-                orderAmount
-        );
-
-        return result.stream()
-                .map(this::toApplicabilityResponse)
-                .toList();
     }
 
     /**
@@ -140,27 +117,6 @@ public class MemberCouponQueryService {
                 coupon.getUsedAt(),
                 coupon.getExpiredAt(),
                 coupon.getCanceledAt()
-        );
-    }
-
-    /**
-     * 적용 가능 쿠폰 응답 변환
-     */
-    private CouponApplicabilityResponse toApplicabilityResponse(MemberCoupon coupon) {
-        CouponPolicy policy = coupon.getPolicy();
-        return new CouponApplicabilityResponse(
-                coupon.getMemberCouponId(),
-                policy.getPolicyId(),
-                policy.getName(),
-                policy.getIssueType().name(),
-                coupon.getStatus().name(),
-                policy.getStatus().name(),
-                policy.getDiscountAmount(),
-                policy.getMinOrderAmount(),
-                policy.getApplyScope().name(),
-                policy.getApplyScope() != CouponApplyScope.ORDER,
-                policy.getUseStartAt(),
-                policy.getUseEndAt()
         );
     }
 

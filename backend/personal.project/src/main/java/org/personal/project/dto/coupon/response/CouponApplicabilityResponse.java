@@ -13,9 +13,10 @@ public record CouponApplicabilityResponse(
         String couponStatus,
         String policyStatus,
         Integer discountAmount,
+        Integer expectedDiscountAmount,
+        Integer applicableAmount,
         Integer minOrderAmount,
         String applyScope,
-        boolean requiresItemCheck,
         LocalDateTime useStartAt,
         LocalDateTime useEndAt) {
 }
