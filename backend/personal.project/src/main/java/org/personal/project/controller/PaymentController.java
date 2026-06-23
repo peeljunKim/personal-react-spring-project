@@ -3,6 +3,7 @@ package org.personal.project.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.personal.project.dto.payment.PaymentCompleteRequest;
+import org.personal.project.dto.payment.PaymentPrepareRequest;
 import org.personal.project.dto.payment.PaymentPrepareResponse;
 import org.personal.project.dto.payment.PaymentSyncResponse;
 import org.personal.project.service.payment.PaymentPrepareService;
@@ -28,18 +29,31 @@ public class PaymentController {
     private final PaymentSynchronizer paymentSynchronizer;
     private final PortOneWebhookService portOneWebhookService;
 
+    /**
+     * 결제 준비
+     */
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/prepare")
-    public PaymentPrepareResponse prepare(Principal principal) {
-        return paymentPrepareService.prepare(principal.getName());
+    public PaymentPrepareResponse prepare(
+            @Valid @RequestBody(required = false) PaymentPrepareRequest request,
+            Principal principal
+    ) {
+        Long memberCouponId = request == null ? null : request.getMemberCouponId();
+        return paymentPrepareService.prepare(principal.getName(), memberCouponId);
     }
 
+    /**
+     * 결제 승인 동기화
+     */
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/complete")
     public PaymentSyncResponse complete(@Valid @RequestBody PaymentCompleteRequest request) {
         return paymentSynchronizer.synchronize(request.getPaymentId());
     }
 
+    /**
+     * 포트원 웹훅 수신
+     */
     @PostMapping(value = "/webhook", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> webhook(@RequestBody String rawBody, @RequestHeader HttpHeaders headers) {
         portOneWebhookService.handle(rawBody, headers);

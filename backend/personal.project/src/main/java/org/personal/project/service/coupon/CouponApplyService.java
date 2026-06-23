@@ -112,10 +112,56 @@ public class CouponApplyService {
     }
 
     /**
-     * 쿠폰 적용을 위해 장바구니 계산 정보?자료? 생성
+     * 결제 준비 쿠폰 적용 금액 계산
+     * <p>
+     * 결제 준비 단계에서는 이미 조회한 장바구니 상품 목록을 재사용합니다.
+     * 미리보기와 같은 검증/계산 규칙을 사용하되, 결과는 주문 예약 로직에서 사용할 수 있도록 MemberCoupon까지 함께 반환합니다.
+     */
+    @Transactional(readOnly = true)
+    public CouponAppliedDiscount calculateForPayment(
+            String memberId,
+            Long memberCouponId,
+            List<CartItem> cartItems
+    ) {
+        CouponApplyContext context = buildContext(memberId, cartItems, true);
+        MemberCoupon coupon = memberCouponRepository.findByMemberCouponIdAndMemberEmail(memberCouponId, memberId)
+                .orElseThrow(() -> new CouponException("사용자 쿠폰을 찾을 수 없습니다."));
+
+        CouponPolicy policy = coupon.getPolicy();
+        validateCouponForPreview(coupon, policy, context);
+
+        List<CouponTarget> targets = couponTargetRepository.findByPolicyPolicyId(policy.getPolicyId());
+        int applicableAmount = calculateApplicableAmount(policy, context, targets);
+        if (applicableAmount <= 0) {
+            throw new CouponException("쿠폰 적용 대상 상품이 없습니다.");
+        }
+
+        int discountAmount = calculateDiscountAmount(policy, applicableAmount);
+        int payableAmount = Math.max(0, context.orderAmount() - discountAmount);
+
+        return new CouponAppliedDiscount(
+                coupon,
+                context.orderAmount(),
+                discountAmount,
+                payableAmount
+        );
+    }
+
+    /**
+     * 현재 장바구니 기준 계산 정보 생성
      */
     private CouponApplyContext buildContext(String memberId, boolean failOnEmptyCart) {
         List<CartItem> cartItems = cartItemRepository.findItemsForCheckout(memberId);
+        return buildContext(memberId, cartItems, failOnEmptyCart);
+    }
+
+    /**
+     * 장바구니 상품 기준 쿠폰 계산 정보 생성
+     * <p>
+     * 상품 삭제 여부, 재고, 수량을 결제 준비와 같은 기준으로 확인합니다.
+     * 비어 있는 장바구니는 조회 API에서는 빈 결과로, 결제/미리보기에서는 예외로 처리합니다.
+     */
+    private CouponApplyContext buildContext(String memberId, List<CartItem> cartItems, boolean failOnEmptyCart) {
         if (cartItems.isEmpty()) {
             if (failOnEmptyCart) {
                 throw new CouponException("장바구니가 비어 있습니다.");
@@ -138,6 +184,9 @@ public class CouponApplyService {
 
     /**
      * 장바구니 상품 적용 금액 변환
+     * <p>
+     * 현재 DB/DTO 금액 타입이 int 기반이므로 int 범위를 넘는 계산은 허용하지 않습니다.
+     * 곱셈은 먼저 long으로 계산해 값이 깨지기 전에 범위 초과를 감지합니다.
      */
     private CouponApplyItem toApplyItem(CartItem cartItem) {
         Product product = cartItem.getProduct();
@@ -216,6 +265,10 @@ public class CouponApplyService {
 
     /**
      * 적용 대상 금액 계산
+     * <p>
+     * ORDER 쿠폰은 전체 주문 금액을 대상으로 사용합니다.
+     * PRODUCT 쿠폰은 CouponTarget에 등록된 상품 금액만 합산합니다.
+     * CATEGORY 쿠폰은 상품 카테고리 모델 도입 전이므로 현재 단계에서는 적용 대상 없음으로 처리합니다.
      */
     private int calculateApplicableAmount(
             CouponPolicy policy,
@@ -292,7 +345,9 @@ public class CouponApplyService {
      * 금액 범위 검증
      * 지금 금액 관련 타입들이 long, int 섞어서 사용하고 있어서 최종 유효성 검사 메소드
      * 여기에 대해서 조금 생각을 해봐야 됨
-     *
+     * 현재 금액 관련 타입들이 int로 저장할 수 있음
+     * 그런데 유지보수나 다른 이유 때문에 long나 객체를 생성하는 게 좋음
+     * <p>
      */
     private void assertIntegerRange(long amount) {
         if (amount > Integer.MAX_VALUE) {

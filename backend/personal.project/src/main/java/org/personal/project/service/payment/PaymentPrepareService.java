@@ -6,6 +6,12 @@ import org.personal.project.entity.CartItem;
 import org.personal.project.entity.Member;
 import org.personal.project.entity.Order;
 import org.personal.project.entity.OrderItem;
+import org.personal.project.entity.coupon.DiscountSourceType;
+import org.personal.project.entity.coupon.MemberCoupon;
+import org.personal.project.entity.coupon.MemberCouponStatus;
+import org.personal.project.entity.coupon.OrderCoupon;
+import org.personal.project.entity.coupon.OrderCouponStatus;
+import org.personal.project.entity.coupon.OrderDiscount;
 import org.personal.project.entity.pg.PaymentRequest;
 import org.personal.project.entity.pg.Trade;
 import org.personal.project.repository.CartItemRepository;
@@ -13,23 +19,25 @@ import org.personal.project.repository.MemberRepository;
 import org.personal.project.repository.OrderRepository;
 import org.personal.project.repository.PaymentRequestRepository;
 import org.personal.project.repository.TradeRepository;
+import org.personal.project.repository.coupon.MemberCouponRepository;
+import org.personal.project.repository.coupon.OrderCouponRepository;
+import org.personal.project.repository.coupon.OrderDiscountRepository;
+import org.personal.project.service.coupon.CouponAppliedDiscount;
+import org.personal.project.service.coupon.CouponApplyService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * 결제 준비 시 주문/상품 스냅샷 생성
- * <p>
- * 상품명이나 가격을 수정할 수 있습니다. 만약 스냅샷을 찍지 않으면 아래 와 같은 문제가 발생
- * <p>
- * 상황: 사용자가 '신발'을 50,000원에 결제했는데 그 직후 관리자가 상품 가격을 60,000원으로 올렸습니다
- * <p>
- * 문제: 나중에 사용자가 주문 내역을 봤을 때 본인은 50,000원에 샀는데 화면에는 현재 가격인 60,000원이 뜨거나
- * 데이터 무결성을 지킬 수 있음
+ * 결제 준비 처리
+ *
+ * 장바구니 기준 주문/상품 스냅샷을 만들고, 선택 쿠폰이 있으면 결제 요청 전에 쿠폰을 예약합니다.
+ * 상품명/가격은 주문 시점 값으로 고정해야 하므로 OrderItem 스냅샷으로 저장합니다.
  */
 @Service
 public class PaymentPrepareService {
@@ -44,6 +52,10 @@ public class PaymentPrepareService {
     private final PaymentLockExecutor lockExecutor;
     private final PortOnePaymentProperties properties;
     private final PortOnePayMethodResolver payMethodResolver;
+    private final CouponApplyService couponApplyService;
+    private final MemberCouponRepository memberCouponRepository;
+    private final OrderCouponRepository orderCouponRepository;
+    private final OrderDiscountRepository orderDiscountRepository;
     private final TransactionTemplate transactionTemplate;
 
     public PaymentPrepareService(
@@ -55,6 +67,10 @@ public class PaymentPrepareService {
             PaymentLockExecutor lockExecutor,
             PortOnePaymentProperties properties,
             PortOnePayMethodResolver payMethodResolver,
+            CouponApplyService couponApplyService,
+            MemberCouponRepository memberCouponRepository,
+            OrderCouponRepository orderCouponRepository,
+            OrderDiscountRepository orderDiscountRepository,
             PlatformTransactionManager transactionManager
     ) {
         this.cartItemRepository = cartItemRepository;
@@ -65,19 +81,36 @@ public class PaymentPrepareService {
         this.lockExecutor = lockExecutor;
         this.properties = properties;
         this.payMethodResolver = payMethodResolver;
+        this.couponApplyService = couponApplyService;
+        this.memberCouponRepository = memberCouponRepository;
+        this.orderCouponRepository = orderCouponRepository;
+        this.orderDiscountRepository = orderDiscountRepository;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     public PaymentPrepareResponse prepare(String email) {
+        return prepare(email, null);
+    }
+
+    /**
+     * 결제 준비 유스케이스
+     */
+    public PaymentPrepareResponse prepare(String email, Long memberCouponId) {
         return lockExecutor.execute(
                 List.of("payment:prepare:member:" + email),
                 3000,
                 10000,
-                () -> transactionTemplate.execute(status -> prepareWithTransaction(email))
+                () -> transactionTemplate.execute(status -> prepareWithTransaction(email, memberCouponId))
         );
     }
 
-    private PaymentPrepareResponse prepareWithTransaction(String email) {
+    /**
+     * 결제 준비 트랜잭션 처리
+     *
+     * 쿠폰 할인 금액을 먼저 계산한 뒤 주문/결제 요청 금액에는 할인 후 금액을 저장합니다.
+     * 쿠폰 예약, OrderCoupon, OrderDiscount 저장이 실패하면 주문 생성도 함께 롤백됩니다.
+     */
+    private PaymentPrepareResponse prepareWithTransaction(String email, Long memberCouponId) {
         assertClientPaymentConfig();
 
         List<CartItem> cartItems = cartItemRepository.findItemsForCheckout(email);
@@ -85,25 +118,40 @@ public class PaymentPrepareService {
             throw new PaymentException("결제할 장바구니 상품이 없습니다.");
         }
 
-        int totalAmount = calculateAndValidateAmount(cartItems);
+        int originalAmount = calculateAndValidateAmount(cartItems);
+        CouponAppliedDiscount couponDiscount = null;
+        int payableAmount = originalAmount;
+        if (memberCouponId != null) {
+            couponDiscount = couponApplyService.calculateForPayment(email, memberCouponId, cartItems);
+            payableAmount = couponDiscount.payableAmount();
+        }
+
         Member member = memberRepository.getReferenceById(email);
 
         String payMethod = resolvePayMethod();
-        Order order = orderRepository.save(Order.ready(member, totalAmount, payMethod));
+        Order order = orderRepository.save(Order.ready(member, payableAmount, payMethod));
         String paymentId = "order-" + order.getOno() + "-" + UUID.randomUUID();
         order.assignPaymentId(paymentId);
-        PaymentRequest paymentRequest = paymentRequestRepository.save(PaymentRequest.create(order.getOno(), totalAmount));
-        tradeRepository.save(Trade.create(paymentRequest, paymentId));
 
         for (CartItem cartItem : cartItems) {
             order.addItem(OrderItem.snapshot(cartItem.getProduct(), cartItem.getQty()));
         }
 
+        if (couponDiscount != null) {
+            reserveCoupon(email, order, couponDiscount);
+        }
+
+        PaymentRequest paymentRequest = paymentRequestRepository.save(PaymentRequest.create(order.getOno(), payableAmount));
+        tradeRepository.save(Trade.create(paymentRequest, paymentId));
+
         return PaymentPrepareResponse.builder()
                 .orderId(order.getOno())
                 .paymentId(paymentId)
                 .orderName(buildOrderName(cartItems))
-                .totalAmount(totalAmount)
+                .totalAmount(payableAmount)
+                .originalAmount(originalAmount)
+                .discountAmount(couponDiscount == null ? 0 : couponDiscount.discountAmount())
+                .payableAmount(payableAmount)
                 .currency(CURRENCY_KRW)
                 .payMethod(payMethod)
                 .storeId(properties.getStoreId())
@@ -112,6 +160,47 @@ public class PaymentPrepareService {
                 .build();
     }
 
+    /**
+     * 쿠폰 예약 및 할인 스냅샷 저장
+     *
+     * MemberCoupon은 조건부 업데이트로 ISSUED 상태일 때만 RESERVED로 변경합니다.
+     * 이후 OrderCoupon은 주문에 묶인 쿠폰 상태를, OrderDiscount는 주문 할인 내역을 남깁니다.
+     */
+    private void reserveCoupon(String email, Order order, CouponAppliedDiscount couponDiscount) {
+        MemberCoupon memberCoupon = couponDiscount.memberCoupon();
+        int updated = memberCouponRepository.reserveIfIssued(
+                memberCoupon.getMemberCouponId(),
+                email,
+                order.getOno(),
+                MemberCouponStatus.ISSUED,
+                MemberCouponStatus.RESERVED,
+                LocalDateTime.now()
+        );
+        if (updated != 1) {
+            throw new PaymentException("쿠폰 예약에 실패했습니다. memberCouponId=" + memberCoupon.getMemberCouponId());
+        }
+
+        Order orderReference = orderRepository.getReferenceById(order.getOno());
+        MemberCoupon memberCouponReference = memberCouponRepository.getReferenceById(memberCoupon.getMemberCouponId());
+        orderCouponRepository.save(OrderCoupon.builder()
+                .order(orderReference)
+                .memberCoupon(memberCouponReference)
+                .discountAmount(couponDiscount.discountAmount())
+                .status(OrderCouponStatus.RESERVED)
+                .build());
+        orderDiscountRepository.save(OrderDiscount.builder()
+                .order(orderReference)
+                .sourceType(DiscountSourceType.COUPON)
+                .sourceId(memberCoupon.getMemberCouponId())
+                .discountAmount(couponDiscount.discountAmount())
+                .appliedOrder(1)
+                .description("쿠폰 할인: " + memberCoupon.getPolicy().getName())
+                .build());
+    }
+
+    /**
+     * 장바구니 원 주문 금액 계산
+     */
     private int calculateAndValidateAmount(List<CartItem> cartItems) {
         long total = 0L;
         for (CartItem cartItem : cartItems) {
@@ -132,6 +221,9 @@ public class PaymentPrepareService {
         return (int) total;
     }
 
+    /**
+     * 결제창 표시 주문명 생성
+     */
     private String buildOrderName(List<CartItem> cartItems) {
         String firstName = cartItems.get(0).getProduct().getPname();
         if (cartItems.size() == 1) {
@@ -140,6 +232,9 @@ public class PaymentPrepareService {
         return firstName + " 외 " + (cartItems.size() - 1) + "건";
     }
 
+    /**
+     * 포트원 클라이언트 설정 검증
+     */
     private void assertClientPaymentConfig() {
         if (!StringUtils.hasText(properties.getStoreId())) {
             throw new PaymentException("PORTONE_STORE_ID 환경 변수가 설정되어 있지 않습니다.");
@@ -152,6 +247,9 @@ public class PaymentPrepareService {
         }
     }
 
+    /**
+     * 결제 수단 결정
+     */
     private String resolvePayMethod() {
         return payMethodResolver.resolve();
     }
