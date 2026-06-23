@@ -290,6 +290,8 @@ public class CouponApplyService {
 
     /**
      * 금액 범위 검증
+     * 지금 금액 관련 타입들이 long, int 섞어서 사용하고 있어서 최종 유효성 검사 메소드
+     * 여기에 대해서 조금 생각을 해봐야 됨
      *
      */
     private void assertIntegerRange(long amount) {
