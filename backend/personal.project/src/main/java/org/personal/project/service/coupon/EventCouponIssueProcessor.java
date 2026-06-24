@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.personal.project.dto.coupon.CouponIssueMessage;
 import org.personal.project.entity.coupon.CouponIssueRequestStatus;
+import org.personal.project.exception.CouponException;
 import org.personal.project.repository.coupon.CouponIssueRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

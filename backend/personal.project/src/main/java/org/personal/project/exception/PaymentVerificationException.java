@@ -1,4 +1,4 @@
-package org.personal.project.service.payment;
+package org.personal.project.exception;
 
 public class PaymentVerificationException extends PaymentException {
 

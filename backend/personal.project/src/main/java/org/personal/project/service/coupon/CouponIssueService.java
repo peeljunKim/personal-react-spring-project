@@ -9,6 +9,7 @@ import org.personal.project.entity.coupon.CouponPolicy;
 import org.personal.project.entity.coupon.CouponPolicyStatus;
 import org.personal.project.entity.coupon.MemberCoupon;
 import org.personal.project.entity.coupon.MemberCouponStatus;
+import org.personal.project.exception.CouponException;
 import org.personal.project.repository.coupon.CouponPolicyRepository;
 import org.personal.project.repository.coupon.MemberCouponRepository;
 import org.personal.project.repository.MemberRepository;

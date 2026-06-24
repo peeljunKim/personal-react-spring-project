@@ -13,6 +13,7 @@ import org.personal.project.entity.coupon.CouponPolicyStatus;
 import org.personal.project.entity.coupon.CouponTarget;
 import org.personal.project.entity.coupon.CouponTargetType;
 import org.personal.project.entity.coupon.MemberCouponStatus;
+import org.personal.project.exception.CouponException;
 import org.personal.project.repository.coupon.CouponPolicyRepository;
 import org.personal.project.repository.coupon.CouponTargetRepository;
 import org.personal.project.repository.coupon.MemberCouponRepository;

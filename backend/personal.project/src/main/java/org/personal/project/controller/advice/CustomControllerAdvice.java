@@ -1,8 +1,8 @@
 package org.personal.project.controller.advice;
 
-import org.personal.project.util.CustomJWTException;
-import org.personal.project.service.payment.PaymentException;
-import org.personal.project.service.coupon.CouponException;
+import org.personal.project.exception.CustomJWTException;
+import org.personal.project.exception.PaymentException;
+import org.personal.project.exception.CouponException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

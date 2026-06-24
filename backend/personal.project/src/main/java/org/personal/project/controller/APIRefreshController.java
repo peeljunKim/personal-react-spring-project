@@ -2,7 +2,7 @@ package org.personal.project.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.personal.project.util.CustomJWTException;
+import org.personal.project.exception.CustomJWTException;
 import org.personal.project.util.JWTUtil;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;

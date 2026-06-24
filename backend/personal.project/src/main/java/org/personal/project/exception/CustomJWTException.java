@@ -1,4 +1,4 @@
-package org.personal.project.util;
+package org.personal.project.exception;
 
 public class CustomJWTException extends RuntimeException {
 

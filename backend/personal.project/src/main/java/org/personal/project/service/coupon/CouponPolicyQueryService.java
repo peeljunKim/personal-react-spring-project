@@ -6,6 +6,7 @@ import org.personal.project.dto.coupon.response.CouponPolicySummaryResponse;
 import org.personal.project.dto.page.PageRequestDTO;
 import org.personal.project.dto.page.PageResponseDTO;
 import org.personal.project.entity.coupon.CouponPolicy;
+import org.personal.project.exception.CouponException;
 import org.personal.project.repository.coupon.CouponPolicyRepository;
 import org.personal.project.repository.coupon.CouponTargetRepository;
 import org.springframework.data.domain.Page;

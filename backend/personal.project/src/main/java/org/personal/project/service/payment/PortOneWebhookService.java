@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.personal.project.dto.payment.PaymentSyncResponse;
 import org.personal.project.entity.pg.PortOneWebhookLog;
+import org.personal.project.exception.PaymentException;
 import org.personal.project.repository.PortOneWebhookLogRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;

@@ -14,6 +14,7 @@ import org.personal.project.entity.coupon.CouponIssueRequest;
 import org.personal.project.entity.coupon.CouponIssueRequestStatus;
 import org.personal.project.entity.coupon.CouponIssueType;
 import org.personal.project.entity.coupon.CouponPolicy;
+import org.personal.project.exception.CouponException;
 import org.personal.project.repository.coupon.CouponIssueOutboxRepository;
 import org.personal.project.repository.coupon.CouponIssueRequestRepository;
 import org.personal.project.repository.coupon.CouponPolicyRepository;

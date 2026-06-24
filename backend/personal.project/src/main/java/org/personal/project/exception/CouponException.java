@@ -1,4 +1,4 @@
-package org.personal.project.service.coupon;
+package org.personal.project.exception;
 
 /**
  * 쿠폰 도메인 예외

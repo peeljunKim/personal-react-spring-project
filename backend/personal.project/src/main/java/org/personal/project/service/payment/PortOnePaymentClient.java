@@ -3,6 +3,7 @@ package org.personal.project.service.payment;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.personal.project.exception.PaymentException;
 import org.personal.project.properties.PortOnePaymentProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;

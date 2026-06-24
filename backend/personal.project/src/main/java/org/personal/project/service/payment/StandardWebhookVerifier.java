@@ -1,6 +1,7 @@
 package org.personal.project.service.payment;
 
 import lombok.RequiredArgsConstructor;
+import org.personal.project.exception.PaymentException;
 import org.personal.project.properties.PortOnePaymentProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;

@@ -3,6 +3,7 @@ package org.personal.project.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.log4j.Log4j2;
+import org.personal.project.exception.CustomJWTException;
 
 import javax.crypto.SecretKey;
 import java.time.ZonedDateTime;
