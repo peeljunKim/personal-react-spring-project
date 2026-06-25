@@ -13,6 +13,7 @@ import org.personal.project.repository.OrderItemRepository;
 import org.personal.project.repository.OrderRepository;
 import org.personal.project.repository.ProductRepository;
 import org.personal.project.repository.TradeRepository;
+import org.personal.project.service.coupon.CouponPaymentService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -30,6 +31,7 @@ public class PaymentSynchronizer {
 
     private static final String CANCEL_REASON_AMOUNT_MISMATCH = "ORDER_AMOUNT_MISMATCH";
     private static final String CANCEL_REASON_STOCK_SHORTAGE = "STOCK_SHORTAGE";
+    private static final String CANCEL_REASON_COUPON_CONFIRM_FAILED = "COUPON_CONFIRM_FAILED";
     private static final String CANCEL_REASON_PROVIDER_REJECTED = "PROVIDER_REJECTED";
 
     private final PortOnePaymentClient portOnePaymentClient;
@@ -37,6 +39,7 @@ public class PaymentSynchronizer {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final TradeRepository tradeRepository;
+    private final CouponPaymentService couponPaymentService;
     private final PaymentLockExecutor lockExecutor;
     private final TransactionTemplate transactionTemplate;
     private final TransactionTemplate requiresNewTransactionTemplate;
@@ -47,6 +50,7 @@ public class PaymentSynchronizer {
             OrderItemRepository orderItemRepository,
             ProductRepository productRepository,
             TradeRepository tradeRepository,
+            CouponPaymentService couponPaymentService,
             PaymentLockExecutor lockExecutor,
             PlatformTransactionManager transactionManager
     ) {
@@ -55,6 +59,7 @@ public class PaymentSynchronizer {
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
         this.tradeRepository = tradeRepository;
+        this.couponPaymentService = couponPaymentService;
         this.lockExecutor = lockExecutor;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager);
@@ -106,6 +111,7 @@ public class PaymentSynchronizer {
                 .orElseThrow(() -> new PaymentException("주문을 찾을 수 없습니다. paymentId=" + paymentId));
 
         if (payment.isFailedOrCancelled()) {
+            couponPaymentService.releaseCouponReservation(order.getOno(), CANCEL_REASON_PROVIDER_REJECTED);
             order.markPaymentFailed();
             tradeRepository.findByTid(paymentId)
                     .filter(trade -> trade.getStatus() != TradeStatus.APPROVED)
@@ -151,6 +157,7 @@ public class PaymentSynchronizer {
         }
 
         decreaseStock(order);
+        confirmCouponUseOrCancel(order);
         order.markPaid();
         tradeRepository.findByTid(paymentId)
                 .ifPresent(trade -> trade.approve(payment.status()));
@@ -183,6 +190,16 @@ public class PaymentSynchronizer {
         }
     }
 
+    private void confirmCouponUseOrCancel(Order order) {
+        try {
+            couponPaymentService.confirmCouponUse(order.getOno());
+        } catch (RuntimeException e) {
+            log.warn("쿠폰 사용 확정 실패로 PG 취소를 진행합니다. orderId={}, paymentId={}",
+                    order.getOno(), order.getPaymentId(), e);
+            cancelAndRollback(order.getPaymentId(), CANCEL_REASON_COUPON_CONFIRM_FAILED);
+        }
+    }
+
     private void cancelAndRollback(String paymentId, String reason) {
         portOnePaymentClient.cancelPayment(paymentId, reason);
         throw new PaymentVerificationException("포트원 결제 취소 후 DB 트랜잭션을 롤백했습니다. reason=" + reason);
@@ -191,11 +208,23 @@ public class PaymentSynchronizer {
     private void markOrderCancelledAfterRollback(String paymentId, String providerStatus, String failureReason) {
         requiresNewTransactionTemplate.execute(status -> {
             orderRepository.findByPaymentId(paymentId)
-                    .ifPresent(Order::markPaymentFailed);
+                    .ifPresent(order -> {
+                        order.markPaymentFailed();
+                        releaseCouponReservationAfterRollback(order, failureReason);
+                    });
             tradeRepository.findByTid(paymentId)
                     .filter(trade -> trade.getStatus() != TradeStatus.APPROVED)
                     .ifPresent(trade -> trade.fail(providerStatus, failureReason));
             return null;
         });
+    }
+
+    private void releaseCouponReservationAfterRollback(Order order, String reason) {
+        try {
+            couponPaymentService.releaseCouponReservation(order.getOno(), reason);
+        } catch (RuntimeException e) {
+            log.error("PG 취소 후 쿠폰 예약 해제에 실패했습니다. orderId={}, paymentId={}",
+                    order.getOno(), order.getPaymentId(), e);
+        }
     }
 }

@@ -2,6 +2,7 @@ package org.personal.project.repository.coupon;
 
 import org.personal.project.entity.coupon.OrderCoupon;
 import org.personal.project.entity.coupon.OrderCouponStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,9 +15,16 @@ public interface OrderCouponRepository extends JpaRepository<OrderCoupon, Long> 
 
     /**
      * 주문 쿠폰 조회
-     * <p>결제 동기화/환불 처리 시 주문 기준 조회</p>
+     * <p>연관 데이터가 필요 없는 단순 주문 쿠폰 조회 시 사용</p>
      */
     Optional<OrderCoupon> findByOrderOno(Long orderId);
+
+    /**
+     * 주문 쿠폰 이력용 조회
+     * <p>주문, 사용자 쿠폰, 정책, 회원 정보 함께 조회 시 사용</p>
+     */
+    @EntityGraph(attributePaths = {"order", "memberCoupon", "memberCoupon.policy", "memberCoupon.member"})
+    Optional<OrderCoupon> findForHistoryByOrderOno(Long orderId);
 
     /**
      * 주문 쿠폰 확정
