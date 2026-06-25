@@ -69,7 +69,7 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
 
     /**
      * 관리자 사용자 쿠폰 조회
-     *
+     * <p>
      * 단 파라미터에 null 값이 오면 해당 조건 제외
      */
     @EntityGraph(attributePaths = {"policy"})
@@ -182,6 +182,31 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
             @Param("nextStatus") MemberCouponStatus nextStatus,
             @Param("expiredStatus") MemberCouponStatus expiredStatus,
             @Param("canceledStatus") MemberCouponStatus canceledStatus,
+            @Param("now") LocalDateTime now
+    );
+
+    /**
+     * 만료 쿠폰 일괄 변경
+     * <p>사용 기간이 지난 ISSUED 쿠폰만 EXPIRED로 변경</p>
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update MemberCoupon c
+               set c.status = :expiredStatus,
+                   c.expiredAt = :now,
+                   c.version = c.version + 1
+             where c.status = :issuedStatus
+               and c.policy.policyId in (
+                   select p.policyId
+                     from CouponPolicy p
+                    where p.useEndAt <= :now
+                      and p.status in :eligiblePolicyStatuses
+               )
+            """)
+    int expireIssuedCoupons(
+            @Param("issuedStatus") MemberCouponStatus issuedStatus,
+            @Param("expiredStatus") MemberCouponStatus expiredStatus,
+            @Param("eligiblePolicyStatuses") Collection<CouponPolicyStatus> eligiblePolicyStatuses,
             @Param("now") LocalDateTime now
     );
 
