@@ -26,6 +26,7 @@ public class Member {
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
+    @Builder.Default
     private List<Order> orders = new ArrayList<>();
 
     public void addRole(MemberRole memberRole) {
