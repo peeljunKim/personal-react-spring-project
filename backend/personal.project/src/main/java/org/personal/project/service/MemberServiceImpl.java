@@ -80,7 +80,7 @@ public class MemberServiceImpl implements MemberService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        UriComponents uriBuilder = UriComponentsBuilder.fromHttpUrl(kakaoGetUserURL).build();
+        UriComponents uriBuilder = UriComponentsBuilder.fromUriString(kakaoGetUserURL).build();
         ResponseEntity<LinkedHashMap> response
                 = restTemplate.exchange(uriBuilder.toString(), HttpMethod.GET, entity, LinkedHashMap.class);
 
