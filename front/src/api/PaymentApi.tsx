@@ -2,8 +2,11 @@ import jwtAxios from '../util/JwtUtil'
 
 const host = 'http://localhost:8080/api/payments'
 
-export const postPreparePayment = async (): Promise<PaymentPrepareResponse> => {
-  const res = await jwtAxios.post(`${host}/prepare`)
+export const postPreparePayment = async (
+  memberCouponId?: number
+): Promise<PaymentPrepareResponse> => {
+  const body = memberCouponId ? { memberCouponId } : undefined
+  const res = await jwtAxios.post(`${host}/prepare`, body)
   return res.data
 }
 

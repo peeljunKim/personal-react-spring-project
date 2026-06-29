@@ -3,6 +3,9 @@ interface PaymentPrepareResponse {
   paymentId: string
   orderName: string
   totalAmount: number
+  originalAmount: number
+  discountAmount: number
+  payableAmount: number
   currency: string
   payMethod: string
   storeId: string

@@ -1,16 +1,24 @@
+import { useMemo, useState } from 'react'
 import useCustomCart from '../../hooks/useCustomCart'
 import { postCompletePayment, postPreparePayment } from '../../api/PaymentApi'
 import CartItemComponent from '../cart/CartItemComponent'
+import CouponComponent from '../cart/CouponComponent'
 
 const CartComponent = () => {
   const { loginState, loginStatus, cartItems, changeCart } = useCustomCart()
+  const [selectedCouponId, setSelectedCouponId] = useState<number>()
+
   const isLoggedIn = loginStatus === 'fulfilled' && Boolean(loginState.email)
   const hasCartItems = cartItems.items.length > 0
   const canCheckout = isLoggedIn && hasCartItems
+  const orderAmount = useMemo(
+    () => cartItems.items.reduce((sum, item) => sum + item.price * item.qty, 0),
+    [cartItems.items]
+  )
 
   const handleClickCheckout = async () => {
     try {
-      const preparedPayment = await postPreparePayment()
+      const preparedPayment = await postPreparePayment(selectedCouponId)
       const paymentGateway = window.PortOne
       // console.log('paymentId', preparedPayment.paymentId)
 
@@ -79,13 +87,20 @@ const CartComponent = () => {
                 </ul>
               </div>
               {canCheckout && (
-                <button
-                  type="button"
-                  className="mt-3 w-full rounded-xl bg-blue-500 px-4 py-3 text-white font-bold shadow-md hover:bg-blue-600"
-                  onClick={handleClickCheckout}
-                >
-                  결제하기
-                </button>
+                <>
+                  <CouponComponent
+                    cartItems={cartItems.items}
+                    orderAmount={orderAmount}
+                    onSelectCoupon={setSelectedCouponId}
+                  />
+                  <button
+                    type="button"
+                    className="mt-3 w-full rounded-xl bg-blue-500 px-4 py-3 text-white font-bold shadow-md hover:bg-blue-600"
+                    onClick={handleClickCheckout}
+                  >
+                    결제하기
+                  </button>
+                </>
               )}
             </>
           )}
