@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 /**
  * 결제 관련 쿠폰 처리
  * <p>
- * 결제 성공 시 쿠폰 사용으로 변경하고 결제 실패/취소 시 알맞는 형태로 쿠폰을 변경
+ * 결제 성공 시 사용자 쿠폰을 사용 확정하고, 결제 실패/취소 시 주문 쿠폰 적용 대기와 Redis 예약을 해제
  */
 @Slf4j
 @Service
@@ -28,6 +28,7 @@ public class CouponPaymentService {
     private final MemberCouponRepository memberCouponRepository;
     private final CouponUsageHistoryRepository couponUsageHistoryRepository;
     private final CouponUsageHistoryFactory couponUsageHistoryFactory;
+    private final CouponReservationService couponReservationService;
 
     /**
      * 쿠폰 사용 확정
@@ -50,13 +51,17 @@ public class CouponPaymentService {
         }
 
         Long memberCouponId = orderCoupon.getMemberCoupon().getMemberCouponId();
+        String memberId = orderCoupon.getMemberCoupon().getMember().getEmail();
+        String paymentId = orderCoupon.getOrder().getPaymentId();
         CouponUsageHistory history = couponUsageHistoryFactory.used(orderCoupon);
         LocalDateTime now = LocalDateTime.now();
 
-        int memberUpdated = memberCouponRepository.confirmUseIfReserved(
+        couponReservationService.validateReservation(memberCouponId, orderId, paymentId);
+
+        int memberUpdated = memberCouponRepository.confirmUseIfIssued(
                 memberCouponId,
-                orderId,
-                MemberCouponStatus.RESERVED,
+                memberId,
+                MemberCouponStatus.ISSUED,
                 MemberCouponStatus.USED,
                 now
         );
@@ -76,10 +81,11 @@ public class CouponPaymentService {
         }
 
         couponUsageHistoryRepository.save(history);
+        couponReservationService.releaseByPayment(memberCouponId, paymentId);
     }
 
     /**
-     * 쿠폰 사용 취소
+     * 주문 쿠폰 적용 대기 해제
      */
     public void releaseCouponReservation(Long orderId, String reason) {
         OrderCoupon orderCoupon = orderCouponRepository.findForHistoryByOrderOno(orderId)
@@ -89,6 +95,10 @@ public class CouponPaymentService {
             return;
         }
         if (orderCoupon.getStatus() == OrderCouponStatus.RELEASED) {
+            couponReservationService.releaseByPayment(
+                    orderCoupon.getMemberCoupon().getMemberCouponId(),
+                    orderCoupon.getOrder().getPaymentId()
+            );
             log.info("이미 쿠폰 예약 해제된 주문입니다. orderId={}", orderId);
             return;
         }
@@ -98,19 +108,9 @@ public class CouponPaymentService {
         }
 
         Long memberCouponId = orderCoupon.getMemberCoupon().getMemberCouponId();
+        String paymentId = orderCoupon.getOrder().getPaymentId();
         CouponUsageHistory history = couponUsageHistoryFactory.released(orderCoupon, reason);
         LocalDateTime now = LocalDateTime.now();
-
-        int memberUpdated = memberCouponRepository.releaseReservationIfReserved(
-                memberCouponId,
-                orderId,
-                MemberCouponStatus.RESERVED,
-                MemberCouponStatus.ISSUED
-        );
-        if (memberUpdated != 1) {
-            throw new CouponException("예약 쿠폰 해제에 실패했습니다. memberCouponId="
-                    + memberCouponId + ", orderId=" + orderId);
-        }
 
         int orderUpdated = orderCouponRepository.markReleasedIfReserved(
                 orderId,
@@ -123,5 +123,6 @@ public class CouponPaymentService {
         }
 
         couponUsageHistoryRepository.save(history);
+        couponReservationService.releaseByPayment(memberCouponId, paymentId);
     }
 }

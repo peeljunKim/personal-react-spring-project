@@ -21,7 +21,7 @@ public class PortOneWebhookService {
 
     private final StandardWebhookVerifier webhookVerifier;
     private final WebhookIdempotencyService idempotencyService;
-    private final PaymentSynchronizer paymentSynchronizer;
+    private final PaymentSynchronizerService paymentSynchronizerService;
     private final PortOneWebhookLogRepository webhookLogRepository;
     private final ObjectMapper objectMapper;
 
@@ -53,7 +53,7 @@ public class PortOneWebhookService {
         }
 
         try {
-            PaymentSyncResponse response = paymentSynchronizer.synchronize(payload.paymentId());
+            PaymentSyncResponse response = paymentSynchronizerService.synchronize(payload.paymentId());
             saveLog(webhookId, payload.paymentId(), payload.type(), response.orderStatus(), rawBody);
             idempotencyService.markProcessed(webhookId);
             return response;

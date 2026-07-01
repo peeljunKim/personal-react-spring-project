@@ -27,12 +27,13 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class PaymentSynchronizer {
+public class PaymentSynchronizerService {
 
     private static final String CANCEL_REASON_AMOUNT_MISMATCH = "ORDER_AMOUNT_MISMATCH";
     private static final String CANCEL_REASON_STOCK_SHORTAGE = "STOCK_SHORTAGE";
     private static final String CANCEL_REASON_COUPON_CONFIRM_FAILED = "COUPON_CONFIRM_FAILED";
     private static final String CANCEL_REASON_PROVIDER_REJECTED = "PROVIDER_REJECTED";
+    private static final String CANCEL_REASON_CLIENT_ABORTED = "CLIENT_PAYMENT_ABORTED";
 
     private final PortOnePaymentClient portOnePaymentClient;
     private final OrderRepository orderRepository;
@@ -44,7 +45,7 @@ public class PaymentSynchronizer {
     private final TransactionTemplate transactionTemplate;
     private final TransactionTemplate requiresNewTransactionTemplate;
 
-    public PaymentSynchronizer(
+    public PaymentSynchronizerService(
             PortOnePaymentClient portOnePaymentClient,
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
@@ -73,6 +74,52 @@ public class PaymentSynchronizer {
                 15000,
                 () -> synchronizeWithPaymentLock(paymentId)
         );
+    }
+
+    public PaymentSyncResponse releasePreparedPayment(String paymentId, String memberId) {
+        return lockExecutor.execute(
+                List.of("payment:sync:" + paymentId),
+                3000,
+                15000,
+                () -> transactionTemplate.execute(status -> releasePreparedPaymentWithTransaction(paymentId, memberId))
+        );
+    }
+
+    private PaymentSyncResponse releasePreparedPaymentWithTransaction(String paymentId, String memberId) {
+        Order order = orderRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new PaymentException("주문을 찾을 수 없습니다. paymentId=" + paymentId));
+
+        if (!order.getMember().getEmail().equals(memberId)) {
+            throw new PaymentException("본인의 주문만 결제 준비를 해제할 수 있습니다. paymentId=" + paymentId);
+        }
+        if (order.getStatus() == OrderStatus.PAID) {
+            return PaymentSyncResponse.builder()
+                    .paymentId(paymentId)
+                    .paymentStatus(order.getPaymentStatus().name())
+                    .orderStatus(order.getStatus().name())
+                    .message("이미 결제 완료된 주문입니다.")
+                    .build();
+        }
+        if (order.getStatus() == OrderStatus.CANCEL) {
+            return PaymentSyncResponse.builder()
+                    .paymentId(paymentId)
+                    .paymentStatus(order.getPaymentStatus().name())
+                    .orderStatus(order.getStatus().name())
+                    .message("이미 취소 처리된 주문입니다.")
+                    .build();
+        }
+
+        couponPaymentService.releaseCouponReservation(order.getOno(), CANCEL_REASON_CLIENT_ABORTED);
+        tradeRepository.findByTid(paymentId)
+                .filter(trade -> trade.getStatus() != TradeStatus.APPROVED)
+                .ifPresent(trade -> trade.fail(CANCEL_REASON_CLIENT_ABORTED, CANCEL_REASON_CLIENT_ABORTED));
+
+        return PaymentSyncResponse.builder()
+                .paymentId(paymentId)
+                .paymentStatus(order.getPaymentStatus().name())
+                .orderStatus(order.getStatus().name())
+                .message("결제창 종료로 결제 준비를 해제했습니다.")
+                .build();
     }
 
     private PaymentSyncResponse synchronizeWithPaymentLock(String paymentId) {

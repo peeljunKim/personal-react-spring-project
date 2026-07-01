@@ -139,6 +139,28 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
     );
 
     /**
+     * 쿠폰 사용 확정
+     * <p>Redis 임시 예약 검증 후 ISSUED 상태를 USED로 변경</p>
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update MemberCoupon c
+               set c.status = :usedStatus,
+                   c.usedAt = :now,
+                   c.version = c.version + 1
+             where c.memberCouponId = :memberCouponId
+               and c.member.email = :memberId
+               and c.status = :issuedStatus
+            """)
+    int confirmUseIfIssued(
+            @Param("memberCouponId") Long memberCouponId,
+            @Param("memberId") String memberId,
+            @Param("issuedStatus") MemberCouponStatus issuedStatus,
+            @Param("usedStatus") MemberCouponStatus usedStatus,
+            @Param("now") LocalDateTime now
+    );
+
+    /**
      * 쿠폰 예약 해제
      * <p>결제 실패/시간 초과 시 RESERVED 상태를 ISSUED로 복구</p>
      */

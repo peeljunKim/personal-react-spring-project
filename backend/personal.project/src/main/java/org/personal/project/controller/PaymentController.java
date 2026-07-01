@@ -7,7 +7,7 @@ import org.personal.project.dto.payment.PaymentPrepareRequest;
 import org.personal.project.dto.payment.PaymentPrepareResponse;
 import org.personal.project.dto.payment.PaymentSyncResponse;
 import org.personal.project.service.payment.PaymentPrepareService;
-import org.personal.project.service.payment.PaymentSynchronizer;
+import org.personal.project.service.payment.PaymentSynchronizerService;
 import org.personal.project.service.payment.PortOneWebhookService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,7 +26,7 @@ import java.security.Principal;
 public class PaymentController {
 
     private final PaymentPrepareService paymentPrepareService;
-    private final PaymentSynchronizer paymentSynchronizer;
+    private final PaymentSynchronizerService paymentSynchronizerService;
     private final PortOneWebhookService portOneWebhookService;
 
     /**
@@ -48,7 +48,16 @@ public class PaymentController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/complete")
     public PaymentSyncResponse complete(@Valid @RequestBody PaymentCompleteRequest request) {
-        return paymentSynchronizer.synchronize(request.getPaymentId());
+        return paymentSynchronizerService.synchronize(request.getPaymentId());
+    }
+
+    /**
+     * 결제 준비 해제
+     */
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping("/release")
+    public PaymentSyncResponse release(@Valid @RequestBody PaymentCompleteRequest request, Principal principal) {
+        return paymentSynchronizerService.releasePreparedPayment(request.getPaymentId(), principal.getName());
     }
 
     /**

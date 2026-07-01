@@ -9,7 +9,6 @@ import org.personal.project.entity.Order;
 import org.personal.project.entity.OrderItem;
 import org.personal.project.entity.coupon.DiscountSourceType;
 import org.personal.project.entity.coupon.MemberCoupon;
-import org.personal.project.entity.coupon.MemberCouponStatus;
 import org.personal.project.entity.coupon.OrderCoupon;
 import org.personal.project.entity.coupon.OrderCouponStatus;
 import org.personal.project.entity.coupon.OrderDiscount;
@@ -25,18 +24,18 @@ import org.personal.project.repository.coupon.OrderCouponRepository;
 import org.personal.project.repository.coupon.OrderDiscountRepository;
 import org.personal.project.service.coupon.CouponAppliedDiscount;
 import org.personal.project.service.coupon.CouponApplyService;
+import org.personal.project.service.coupon.CouponReservationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * 결제 준비 처리
- *
+ * <p>
  * 장바구니 기준 주문/상품 스냅샷을 만들고, 선택 쿠폰이 있으면 결제 요청 전에 쿠폰을 예약합니다.
  * 상품명/가격은 주문 시점 값으로 고정해야 하므로 OrderItem 스냅샷으로 저장합니다.
  */
@@ -57,6 +56,7 @@ public class PaymentPrepareService {
     private final MemberCouponRepository memberCouponRepository;
     private final OrderCouponRepository orderCouponRepository;
     private final OrderDiscountRepository orderDiscountRepository;
+    private final CouponReservationService couponReservationService;
     private final TransactionTemplate transactionTemplate;
 
     public PaymentPrepareService(
@@ -72,6 +72,7 @@ public class PaymentPrepareService {
             MemberCouponRepository memberCouponRepository,
             OrderCouponRepository orderCouponRepository,
             OrderDiscountRepository orderDiscountRepository,
+            CouponReservationService couponReservationService,
             PlatformTransactionManager transactionManager
     ) {
         this.cartItemRepository = cartItemRepository;
@@ -86,6 +87,7 @@ public class PaymentPrepareService {
         this.memberCouponRepository = memberCouponRepository;
         this.orderCouponRepository = orderCouponRepository;
         this.orderDiscountRepository = orderDiscountRepository;
+        this.couponReservationService = couponReservationService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -107,7 +109,7 @@ public class PaymentPrepareService {
 
     /**
      * 결제 준비 트랜잭션 처리
-     *
+     * <p>
      * 쿠폰 할인 금액을 먼저 계산한 뒤 주문/결제 요청 금액에는 할인 후 금액을 저장합니다.
      * 쿠폰 예약, OrderCoupon, OrderDiscount 저장이 실패하면 주문 생성도 함께 롤백됩니다.
      */
@@ -139,11 +141,15 @@ public class PaymentPrepareService {
         }
 
         if (couponDiscount != null) {
-            reserveCoupon(email, order, couponDiscount);
+            createCouponSnapshot(order, couponDiscount);
         }
 
         PaymentRequest paymentRequest = paymentRequestRepository.save(PaymentRequest.create(order.getOno(), payableAmount));
         tradeRepository.save(Trade.create(paymentRequest, paymentId));
+
+        if (couponDiscount != null) {
+            reserveCouponInRedis(email, order, couponDiscount);
+        }
 
         return PaymentPrepareResponse.builder()
                 .orderId(order.getOno())
@@ -162,25 +168,12 @@ public class PaymentPrepareService {
     }
 
     /**
-     * 쿠폰 예약 및 할인 스냅샷 저장
-     *
-     * MemberCoupon은 조건부 업데이트로 ISSUED 상태일 때만 RESERVED로 변경합니다.
-     * 이후 OrderCoupon은 주문에 묶인 쿠폰 상태를, OrderDiscount는 주문 할인 내역을 남깁니다.
+     * 주문 쿠폰 할인 스냅샷 저장
+     * <p>
+     * MemberCoupon 상태는 변경하지 않고, OrderCoupon은 이 주문에 적용된 쿠폰 할인 내역을 남깁니다.
      */
-    private void reserveCoupon(String email, Order order, CouponAppliedDiscount couponDiscount) {
+    private void createCouponSnapshot(Order order, CouponAppliedDiscount couponDiscount) {
         MemberCoupon memberCoupon = couponDiscount.memberCoupon();
-        int updated = memberCouponRepository.reserveIfIssued(
-                memberCoupon.getMemberCouponId(),
-                email,
-                order.getOno(),
-                MemberCouponStatus.ISSUED,
-                MemberCouponStatus.RESERVED,
-                LocalDateTime.now()
-        );
-        if (updated != 1) {
-            throw new PaymentException("쿠폰 예약에 실패했습니다. memberCouponId=" + memberCoupon.getMemberCouponId());
-        }
-
         Order orderReference = orderRepository.getReferenceById(order.getOno());
         MemberCoupon memberCouponReference = memberCouponRepository.getReferenceById(memberCoupon.getMemberCouponId());
         orderCouponRepository.save(OrderCoupon.builder()
@@ -197,6 +190,19 @@ public class PaymentPrepareService {
                 .appliedOrder(1)
                 .description("쿠폰 할인: " + memberCoupon.getPolicy().getName())
                 .build());
+    }
+
+    /**
+     * Redis 쿠폰 임시 예약 생성
+     */
+    private void reserveCouponInRedis(String email, Order order, CouponAppliedDiscount couponDiscount) {
+        couponReservationService.reserve(
+                couponDiscount.memberCoupon().getMemberCouponId(),
+                email,
+                order.getOno(),
+                order.getPaymentId(),
+                order.getPayMethod()
+        );
     }
 
     /**

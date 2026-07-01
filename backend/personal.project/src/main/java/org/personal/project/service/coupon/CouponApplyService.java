@@ -42,6 +42,7 @@ public class CouponApplyService {
     private final CartItemRepository cartItemRepository;
     private final MemberCouponRepository memberCouponRepository;
     private final CouponTargetRepository couponTargetRepository;
+    private final CouponReservationService couponReservationService;
 
     /**
      * 현재 장바구니 적용 가능 쿠폰 조회
@@ -63,10 +64,13 @@ public class CouponApplyService {
                 USABLE_POLICY_STATUSES,
                 now
         );
+        List<MemberCoupon> reservableCoupons = coupons.stream()
+                .filter(coupon -> !couponReservationService.isReserved(coupon.getMemberCouponId()))
+                .toList();
 
-        Map<Long, List<CouponTarget>> targetMap = findTargetMap(toPolicyIds(coupons));
+        Map<Long, List<CouponTarget>> targetMap = findTargetMap(toPolicyIds(reservableCoupons));
 
-        List<CouponApplicabilityResponse> response = coupons.stream()
+        List<CouponApplicabilityResponse> response = reservableCoupons.stream()
                 .filter(coupon -> isMinimumOrderAmountSatisfied(coupon.getPolicy(), context.orderAmount()))
                 .map(coupon -> toApplicabilityResponse(coupon, context, targetMap.getOrDefault(
                         coupon.getPolicy().getPolicyId(),
@@ -253,6 +257,9 @@ public class CouponApplyService {
         }
         if (!USABLE_POLICY_STATUSES.contains(policy.getStatus())) {
             throw new CouponException("사용 가능한 쿠폰 정책이 아닙니다.");
+        }
+        if (couponReservationService.isReserved(coupon.getMemberCouponId())) {
+            throw new CouponException("이미 결제 진행 중인 쿠폰입니다.");
         }
 
         LocalDateTime now = LocalDateTime.now();
