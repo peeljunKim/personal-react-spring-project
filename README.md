@@ -15,7 +15,7 @@
 - [시스템 구성](#시스템-구성)
 - [API 요약](#api-요약)
 - [프로젝트 구조](#프로젝트-구조)
-- [로컬 실행](#로컬-실행-방법)
+- [실행 방법](#로컬-실행-방법)
 - [후속 과제](#후속-과제)
 
 ## 프로젝트 목표
@@ -28,20 +28,21 @@
 
 ## 주요 기능
 
-| 영역        | 기능                                                                           |
-| ----------- | ------------------------------------------------------------------------------ |
-| 회원        | Spring Security 기반 로그인, JWT 발급·재발급, Kakao OAuth 2.0 로그인           |
-| 상품        | 상품 등록·수정·삭제, 이미지 업로드, 목록·상세 조회                             |
-| 장바구니    | 사용자별 장바구니 조회, 수량 변경, 상품 삭제                                   |
-| 주문        | 주문 시점 상품·가격 스냅샷 저장, 주문 목록·상세·결제 내역 조회                 |
-| 결제        | PortOne 결제 준비, 서버 검증, 결제창 이탈 처리, 웹훅 동기화                    |
-| 쿠폰        | 쿠폰 정책 관리, 발급·조회·만료, 적용 가능 여부 및 할인 금액 계산               |
-| 이벤트 쿠폰 | 요청 멱등성, Outbox 저장, RabbitMQ 발행·소비, ACK/NACK 및 DLQ 구성             |
-| ETC         | 미완료 주문 CSV 아카이빙, Actuator·Prometheus·Grafana 모니터링, k6 부하 테스트 |
+| 영역     | 기능                                                           |
+|--------|--------------------------------------------------------------|
+| 회원     | Spring Security 기반 로그인, JWT 발급·재발급, Kakao OAuth 2.0 로그인      |
+| 상품     | 상품 등록·수정·삭제, 이미지 업로드, 목록·상세 조회                               |
+| 장바구니   | 사용자별 장바구니 조회, 수량 변경, 상품 삭제                                   |
+| 주문     | 주문 시점 상품·가격 스냅샷 저장, 주문 목록·상세·결제 내역 조회                        |
+| 결제     | PortOne 결제 준비, 서버 검증, 결제창 이탈 처리, 웹훅 동기화                      |
+| 쿠폰     | 쿠폰 정책 관리, 발급·조회·만료, 적용 가능 여부 및 할인 금액 계산                      |
+| 이벤트 쿠폰 | 요청 멱등성, Outbox 저장, RabbitMQ 발행·소비, ACK/NACK 및 DLQ 구성         |
+| ETC    | 미완료 주문 CSV 아카이빙, Actuator·Prometheus·Grafana 모니터링, k6 부하 테스트 |
 
 ## 기술 스택
 
-- **Backend:** Java 17, Spring Boot 3.5.5 (Web, Security, Validation, AOP, Actuator, Data JPA, AMQP), QueryDSL, MySQL, Redis, Redisson, RabbitMQ, JWT
+- **Backend:** Java 17, Spring Boot 3.5.5 (Web, Security, Validation, AOP, Actuator, Data JPA, AMQP), QueryDSL, MySQL,
+  Redis, Redisson, RabbitMQ, JWT
 - **Frontend:** React 19, TypeScript, Vite, Zustand, Redux Toolkit, React Query, Tailwind CSS
 - **External:** PortOne, Kakao OAuth 2.0
 - **Monitoring & Test:** Micrometer, Brave Tracing, Prometheus, Grafana, Redis Exporter, k6, JUnit 5
@@ -80,7 +81,8 @@
 
 ### 4. 미완료 주문 데이터 아카이빙
 
-결제 검증 실패나 사용자 이탈로 생성된 미완료 주문이 운영 테이블에 계속 누적되는 문제를 발견했습니다. 장애 분석과 고객 문의에 필요한 데이터는 보존하면서, 운영 DB의 데이터 부담을 줄이기 위해 CSV 아카이빙 기능을 구현했습니다.
+결제 검증 실패나 사용자 이탈로 생성된 미완료 주문이 운영 테이블에 계속 누적되는 문제를 발견했습니다. 장애 분석과 고객 문의에 필요한 데이터는 보존하면서, 운영 DB의 데이터 부담을 줄이기 위해 CSV 아카이빙
+기능을 구현했습니다.
 
 #### 구현 내용
 
@@ -98,8 +100,8 @@
     <th>미완료 주문 50K</th>
   </tr>
   <tr>
-    <td><img src="k6-reporter-10k.png" alt="미완료 주문 10K 아카이빙 성능 테스트 결과"></td>
-    <td><img src="k6-reporter-50k.png" alt="미완료 주문 50K 아카이빙 성능 테스트 결과"></td>
+    <td><img width="500" height="300" alt="10K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/be0e9421-f06a-490c-b972-a16b07d2a78c" /></td>
+    <td><img width="500" height="300" alt="50K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/c4ac4b14-3477-4bcf-bd49-db76a6cb73b9" /></td>
   </tr>
   <tr>
     <td><a href="k6/results/k6-reporter-archive-comparison-10k.html">10K 상세 결과 보고서</a></td>
@@ -107,7 +109,8 @@
   </tr>
 </table>
 
-k6로 아카이빙 전후 성능을 비교한 결과, 미완료 주문 1만 건에서는 유의미한 차이가 나타나지 않았습니다. 반면 5만 건 누적 환경에서는 아카이빙 후 TPS가 약 4% 향상되고 응답 지연 시간이 약 21% 감소했습니다.
+k6로 아카이빙 전후 성능을 비교한 결과, 미완료 주문 1만 건에서는 유의미한 차이가 나타나지 않았습니다. 반면 5만 건 누적 환경에서는 아카이빙 후 TPS가 약 4% 향상되고 응답 지연 시간이 약 21%
+감소했습니다.
 
 ## 시스템 구성
 
@@ -129,23 +132,23 @@ flowchart LR
 
 ## API 요약
 
-| 도메인   | Method | Endpoint                               | 설명                      |
-| -------- | ------ | -------------------------------------- | ------------------------- |
-| 회원     | POST   | `/api/member/login`                    | 로그인 및 JWT 발급        |
-| 회원     | POST   | `/api/member/refresh`                  | 토큰 재발급               |
-| 상품     | GET    | `/api/products/list`                   | 상품 목록 조회            |
-| 상품     | POST   | `/api/products`                        | 상품 등록                 |
-| 장바구니 | GET    | `/api/cart/items`                      | 장바구니 조회             |
+| 도메인  | Method | Endpoint                               | 설명               |
+|------|--------|----------------------------------------|------------------|
+| 회원   | POST   | `/api/member/login`                    | 로그인 및 JWT 발급     |
+| 회원   | POST   | `/api/member/refresh`                  | 토큰 재발급           |
+| 상품   | GET    | `/api/products/list`                   | 상품 목록 조회         |
+| 상품   | POST   | `/api/products`                        | 상품 등록            |
+| 장바구니 | GET    | `/api/cart/items`                      | 장바구니 조회          |
 | 장바구니 | POST   | `/api/cart/change`                     | 수량 변경 및 상품 추가    |
-| 주문     | GET    | `/api/orders`                          | 주문 목록 조회            |
-| 주문     | GET    | `/api/orders/{orderId}`                | 주문 상세 조회            |
-| 결제     | POST   | `/api/payments/prepare`                | 주문 스냅샷 및 결제 준비  |
-| 결제     | POST   | `/api/payments/complete`               | PG 조회 후 결제 검증·확정 |
-| 결제     | POST   | `/api/payments/release`                | 결제창 이탈 처리          |
-| 결제     | POST   | `/api/payments/webhook`                | PortOne 웹훅 처리         |
-| 쿠폰     | POST   | `/api/coupons/{policyId}/issue`        | 일반 쿠폰 발급            |
-| 쿠폰     | POST   | `/api/coupons/events/{policyId}/issue` | 이벤트 쿠폰 발급 요청     |
-| 쿠폰     | GET    | `/api/me/coupons`                      | 보유 쿠폰 조회            |
+| 주문   | GET    | `/api/orders`                          | 주문 목록 조회         |
+| 주문   | GET    | `/api/orders/{orderId}`                | 주문 상세 조회         |
+| 결제   | POST   | `/api/payments/prepare`                | 주문 스냅샷 및 결제 준비   |
+| 결제   | POST   | `/api/payments/complete`               | PG 조회 후 결제 검증·확정 |
+| 결제   | POST   | `/api/payments/release`                | 결제창 이탈 처리        |
+| 결제   | POST   | `/api/payments/webhook`                | PortOne 웹훅 처리    |
+| 쿠폰   | POST   | `/api/coupons/{policyId}/issue`        | 일반 쿠폰 발급         |
+| 쿠폰   | POST   | `/api/coupons/events/{policyId}/issue` | 이벤트 쿠폰 발급 요청     |
+| 쿠폰   | GET    | `/api/me/coupons`                      | 보유 쿠폰 조회         |
 
 ## 프로젝트 구조
 
@@ -190,7 +193,8 @@ cd backend/personal.project
 .\gradlew.bat bootRun
 ```
 
-Backend는 기본적으로 `http://localhost:8080`에서 실행됩니다. 실제 결제 연동에는 `PORTONE_API_SECRET`, `PORTONE_STORE_ID`, `PORTONE_CHANNEL_KEY`, `PORTONE_WEBHOOK_URL`, `PORTONE_WEBHOOK_SECRET` 환경 변수가 필요합니다.
+Backend는 기본적으로 `http://localhost:8080`에서 실행됩니다. 실제 결제 연동에는 `PORTONE_API_SECRET`, `PORTONE_STORE_ID`,
+`PORTONE_CHANNEL_KEY`, `PORTONE_WEBHOOK_URL`, `PORTONE_WEBHOOK_SECRET` 환경 변수가 필요합니다.
 
 ### 3. Frontend 실행
 
