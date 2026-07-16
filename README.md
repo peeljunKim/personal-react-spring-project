@@ -100,8 +100,8 @@
     <th>미완료 주문 50K</th>
   </tr>
   <tr>
-    <td><img width="500" height="300" alt="10K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/be0e9421-f06a-490c-b972-a16b07d2a78c" /></td>
-    <td><img width="500" height="300" alt="50K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/c4ac4b14-3477-4bcf-bd49-db76a6cb73b9" /></td>
+    <td><img width="500" height="500" alt="10K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/be0e9421-f06a-490c-b972-a16b07d2a78c" /></td>
+    <td><img width="500" height="500" alt="50K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/c4ac4b14-3477-4bcf-bd49-db76a6cb73b9" /></td>
   </tr>
   <tr>
     <td><a href="k6/results/k6-reporter-archive-comparison-10k.html">10K 상세 결과 보고서</a></td>
