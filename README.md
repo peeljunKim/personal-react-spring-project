@@ -94,18 +94,39 @@
 
 #### 성능 검증 결과
 
+#### 10K 성능 비교
+
 <table>
   <tr>
-    <th>미완료 주문 10K</th>
-    <th>미완료 주문 50K</th>
+    <th>Before</th>
+    <th>After</th>
   </tr>
   <tr>
-    <td><img width="500" height="500" alt="10K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/c4ac4b14-3477-4bcf-bd49-db76a6cb73b9" /></td>
-    <td><img width="500" height="500" alt="50K 아카이빙 성능 테스트 결과" src="https://github.com/user-attachments/assets/be0e9421-f06a-490c-b972-a16b07d2a78c" /></td>
+    <td><img width="500" height="500" alt="10K Before" src="https://github.com/user-attachments/assets/3a951b97-cb03-4d06-9165-0e515b74e202" /></td>
+    <td><img width="500" height="500" alt="10K After" src="https://github.com/user-attachments/assets/beaa463e-7964-49db-bcdc-80b586732c5a" /></td>
   </tr>
   <tr>
-    <td><a href="/docs/k6-reporter-archive-comparison-10k.html">10K 상세 결과 보고서</a></td>
-    <td><a href="/docs/k6-reporter-archive-comparison-50k.html">50K 상세 결과 보고서</a></td>
+    <td><a href="k6/results/k6-reporter-10k-before.html">Before 상세 보고서</a></td>
+    <td><a href="k6/results/k6-reporter-10k-after.html">After 상세 보고서</a></td>
+  </tr>
+</table>
+
+<br>  
+
+#### 50K 성능 비교
+
+<table>
+  <tr>
+    <th>Before</th>
+    <th>After</th>
+  </tr>
+  <tr>
+    <td><img width="500" height="500" alt="50K Before" src="https://github.com/user-attachments/assets/490327cb-c853-42d3-9646-effc77e59fe6" /></td>
+    <td><img width="500" height="500" alt="50K After" src="https://github.com/user-attachments/assets/d6f1014f-8df4-49ac-aed0-cfe549faea89" /></td>
+  </tr>
+  <tr>
+    <td><a href="k6/results/k6-reporter-50k-before.html">Before 상세 보고서</a></td>
+    <td><a href="k6/results/k6-reporter-50k-after.html">After 상세 보고서</a></td>
   </tr>
 </table>
 
