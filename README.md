@@ -107,11 +107,11 @@
   </tr>
   <tr>
     <td>
-      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-performance-report-v1/k6-reporter-10k-before.html">
+      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-report-v1/k6-reporter-10k-before.html">
         <strong>Before 보고서 다운로드</strong>
       </a>
     <td>
-      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-performance-report-v1/k6-reporter-10k-after.html">
+      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-report-v1/k6-reporter-10k-after.html">
         <strong>After 보고서 다운로드</strong>
       </a>
   </tr>
@@ -136,12 +136,12 @@
   </tr>
   <tr>
     <td>
-      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-performance-report-v1/k6-reporter-50k-before.html">
+      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-report-v1/k6-reporter-50k-before.html">
         <strong>Before 상세 보고서 다운로드</strong>
       </a>
     </td>
     <td>
-      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-performance-report-v1/k6-reporter-50k-after.html">
+      <a href="https://github.com/peeljunKim/personal-react-spring-project/releases/download/k6-report-v1/k6-reporter-50k-after.html">
         <strong>After 상세 보고서 다운로드</strong>
       </a>
     </td>
