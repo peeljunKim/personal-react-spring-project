@@ -106,8 +106,8 @@
     <td><img width="500" height="500" alt="10K After" src="https://github.com/user-attachments/assets/beaa463e-7964-49db-bcdc-80b586732c5a" /></td>
   </tr>
   <tr>
-    <td><a href="k6/k6-reporter-10k-before.html" download>Before 상세 보고서</a></td>
-    <td><a href="k6/k6-reporter-10k-after.html" download>After 상세 보고서</a></td>
+    <td><a href="https://raw.githubusercontent.com/peeljunKim/personal-react-spring-project/main/k6/k6-reporter-10k-before.html">Before 상세 보고서</a></td>
+    <td><a href="https://raw.githubusercontent.com/peeljunKim/personal-react-spring-project/main/k6/k6-reporter-10k-after.html">After 상세 보고서</a></td>
   </tr>
 </table>
 
@@ -125,8 +125,8 @@
     <td><img width="500" height="500" alt="50K After" src="https://github.com/user-attachments/assets/d6f1014f-8df4-49ac-aed0-cfe549faea89" /></td>
   </tr>
   <tr>
-    <td><a href="k6/k6-reporter-50k-before.html" download>Before 상세 보고서</a></td>
-    <td><a href="k6/k6-reporter-50k-after.html" download>After 상세 보고서</a></td>
+    <td><a href="https://raw.githubusercontent.com/peeljunKim/personal-react-spring-project/main/k6/k6-reporter-50k-before.html">Before 상세 보고서</a></td>
+    <td><a href="https://raw.githubusercontent.com/peeljunKim/personal-react-spring-project/main/k6/k6-reporter-50k-after.html">After 상세 보고서</a></td>
   </tr>
 </table>
 
