@@ -28,16 +28,16 @@
 
 ## 주요 기능
 
-| 영역     | 기능                                                           |
-|--------|--------------------------------------------------------------|
-| 회원     | Spring Security 기반 로그인, JWT 발급·재발급, Kakao OAuth 2.0 로그인      |
-| 상품     | 상품 등록·수정·삭제, 이미지 업로드, 목록·상세 조회                               |
-| 장바구니   | 사용자별 장바구니 조회, 수량 변경, 상품 삭제                                   |
-| 주문     | 주문 시점 상품·가격 스냅샷 저장, 주문 목록·상세·결제 내역 조회                        |
-| 결제     | PortOne 결제 준비, 서버 검증, 결제창 이탈 처리, 웹훅 동기화                      |
-| 쿠폰     | 쿠폰 정책 관리, 발급·조회·만료, 적용 가능 여부 및 할인 금액 계산                      |
-| 이벤트 쿠폰 | 요청 멱등성, Outbox 저장, RabbitMQ 발행·소비, ACK/NACK 및 DLQ 구성         |
-| ETC    | 미완료 주문 CSV 아카이빙, Actuator·Prometheus·Grafana 모니터링, k6 부하 테스트 |
+| 영역        | 기능                                                                           |
+| ----------- | ------------------------------------------------------------------------------ |
+| 회원        | Spring Security 기반 로그인, JWT 발급·재발급, Kakao OAuth 2.0 로그인           |
+| 상품        | 상품 등록·수정·삭제, 이미지 업로드, 목록·상세 조회                             |
+| 장바구니    | 사용자별 장바구니 조회, 수량 변경, 상품 삭제                                   |
+| 주문        | 주문 시점 상품·가격 스냅샷 저장, 주문 목록·상세·결제 내역 조회                 |
+| 결제        | PortOne 결제 준비, 서버 검증, 결제창 이탈 처리, 웹훅 동기화                    |
+| 쿠폰        | 쿠폰 정책 관리, 발급·조회·만료, 적용 가능 여부 및 할인 금액 계산               |
+| 이벤트 쿠폰 | 요청 멱등성, Outbox 저장, RabbitMQ 발행·소비, ACK/NACK 및 DLQ 구성             |
+| ETC         | 미완료 주문 CSV 아카이빙, Actuator·Prometheus·Grafana 모니터링, k6 부하 테스트 |
 
 ## 기술 스택
 
@@ -106,12 +106,12 @@
     <td><img width="500" height="500" alt="10K After" src="https://github.com/user-attachments/assets/beaa463e-7964-49db-bcdc-80b586732c5a" /></td>
   </tr>
   <tr>
-    <td><a href="k6/results/k6-reporter-10k-before.html">Before 상세 보고서</a></td>
-    <td><a href="k6/results/k6-reporter-10k-after.html">After 상세 보고서</a></td>
+    <td>[Before 상세 보고서](k6/k6-reporter-10k-before.html?download=true)</td>
+    <td>[After 상세 보고서](k6/k6-reporter-10k-after.html?download=true)</td>
   </tr>
 </table>
 
-<br>  
+<br>
 
 #### 50K 성능 비교
 
@@ -125,8 +125,8 @@
     <td><img width="500" height="500" alt="50K After" src="https://github.com/user-attachments/assets/d6f1014f-8df4-49ac-aed0-cfe549faea89" /></td>
   </tr>
   <tr>
-    <td><a href="k6/results/k6-reporter-50k-before.html">Before 상세 보고서</a></td>
-    <td><a href="k6/results/k6-reporter-50k-after.html">After 상세 보고서</a></td>
+    <td><a href="k6/k6-reporter-10k-before.html?download=true">Before 상세 보고서</a></td>
+    <td><a href="k6/k6-reporter-10k-after.html?download=true">After 상세 보고서</a></td>
   </tr>
 </table>
 
@@ -153,23 +153,23 @@ flowchart LR
 
 ## API 요약
 
-| 도메인  | Method | Endpoint                               | 설명               |
-|------|--------|----------------------------------------|------------------|
-| 회원   | POST   | `/api/member/login`                    | 로그인 및 JWT 발급     |
-| 회원   | POST   | `/api/member/refresh`                  | 토큰 재발급           |
-| 상품   | GET    | `/api/products/list`                   | 상품 목록 조회         |
-| 상품   | POST   | `/api/products`                        | 상품 등록            |
-| 장바구니 | GET    | `/api/cart/items`                      | 장바구니 조회          |
+| 도메인   | Method | Endpoint                               | 설명                      |
+| -------- | ------ | -------------------------------------- | ------------------------- |
+| 회원     | POST   | `/api/member/login`                    | 로그인 및 JWT 발급        |
+| 회원     | POST   | `/api/member/refresh`                  | 토큰 재발급               |
+| 상품     | GET    | `/api/products/list`                   | 상품 목록 조회            |
+| 상품     | POST   | `/api/products`                        | 상품 등록                 |
+| 장바구니 | GET    | `/api/cart/items`                      | 장바구니 조회             |
 | 장바구니 | POST   | `/api/cart/change`                     | 수량 변경 및 상품 추가    |
-| 주문   | GET    | `/api/orders`                          | 주문 목록 조회         |
-| 주문   | GET    | `/api/orders/{orderId}`                | 주문 상세 조회         |
-| 결제   | POST   | `/api/payments/prepare`                | 주문 스냅샷 및 결제 준비   |
-| 결제   | POST   | `/api/payments/complete`               | PG 조회 후 결제 검증·확정 |
-| 결제   | POST   | `/api/payments/release`                | 결제창 이탈 처리        |
-| 결제   | POST   | `/api/payments/webhook`                | PortOne 웹훅 처리    |
-| 쿠폰   | POST   | `/api/coupons/{policyId}/issue`        | 일반 쿠폰 발급         |
-| 쿠폰   | POST   | `/api/coupons/events/{policyId}/issue` | 이벤트 쿠폰 발급 요청     |
-| 쿠폰   | GET    | `/api/me/coupons`                      | 보유 쿠폰 조회         |
+| 주문     | GET    | `/api/orders`                          | 주문 목록 조회            |
+| 주문     | GET    | `/api/orders/{orderId}`                | 주문 상세 조회            |
+| 결제     | POST   | `/api/payments/prepare`                | 주문 스냅샷 및 결제 준비  |
+| 결제     | POST   | `/api/payments/complete`               | PG 조회 후 결제 검증·확정 |
+| 결제     | POST   | `/api/payments/release`                | 결제창 이탈 처리          |
+| 결제     | POST   | `/api/payments/webhook`                | PortOne 웹훅 처리         |
+| 쿠폰     | POST   | `/api/coupons/{policyId}/issue`        | 일반 쿠폰 발급            |
+| 쿠폰     | POST   | `/api/coupons/events/{policyId}/issue` | 이벤트 쿠폰 발급 요청     |
+| 쿠폰     | GET    | `/api/me/coupons`                      | 보유 쿠폰 조회            |
 
 ## 프로젝트 구조
 
