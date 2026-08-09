@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -134,10 +133,8 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
 
             response.setContentType("application/json");
-
-            PrintWriter printWriter = response.getWriter();
-            printWriter.println(msg);
-            printWriter.close();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().println(msg);
         }
 
     }

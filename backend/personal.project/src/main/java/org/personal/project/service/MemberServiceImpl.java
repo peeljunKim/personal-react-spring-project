@@ -29,6 +29,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final RestTemplate kakaoRestTemplate;
 
     @Override
     public MemberDTO getKakaoMember(String accessToken) {
@@ -72,8 +73,6 @@ public class MemberServiceImpl implements MemberService {
             throw new RuntimeException("Access Token is null");
         }
 
-        RestTemplate restTemplate = new RestTemplate();
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
         headers.add("Content-Type", "application/x-www-form-urlencoded");
@@ -82,7 +81,7 @@ public class MemberServiceImpl implements MemberService {
 
         UriComponents uriBuilder = UriComponentsBuilder.fromUriString(kakaoGetUserURL).build();
         ResponseEntity<LinkedHashMap> response
-                = restTemplate.exchange(uriBuilder.toString(), HttpMethod.GET, entity, LinkedHashMap.class);
+                = kakaoRestTemplate.exchange(uriBuilder.toString(), HttpMethod.GET, entity, LinkedHashMap.class);
 
         log.info(response);
 

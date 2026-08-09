@@ -62,6 +62,7 @@ public class RabbitMqConfig {
 
         rabbitTemplate.setMessageConverter(rabbitMessageConverter);
         rabbitTemplate.setMandatory(true);  // mandatory=true이면 라우팅 실패 메시지를 publisher return callback에서 감지할 수 있음
+        rabbitTemplate.setObservationEnabled(true);
 
         return rabbitTemplate;
     }
@@ -83,6 +84,7 @@ public class RabbitMqConfig {
 
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(rabbitMessageConverter);
+        factory.setObservationEnabled(true);
 
         /*
           수동 ACK 모드 설정
